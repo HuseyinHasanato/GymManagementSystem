@@ -4,40 +4,50 @@
     ViewData["Title"] = "Yeni Eğitmen Ekle";
 }
 
-<h2 class="text-center mb-4">🤸 Yeni Eğitmen Oluştur</h2>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h3 class="card-title mb-0"><i class="bi bi-person-plus"></i> Yeni Eğitmen Ekle</h3>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-<hr />
-<div class="row justify-content-center">
-    @* Formu ortalamak için justify-content-center ekledik *@
-    <div class="col-md-6">
-        @* Formu biraz daha genişlettik *@
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="mb-3">
+                            <label asp-for="FullName" class="form-label fw-bold"></label>
+                            <input asp-for="FullName" class="form-control" placeholder="Örn: Ahmet Yılmaz" />
+                            <span asp-validation-for="FullName" class="text-danger"></span>
+                        </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="FullName" class="control-label"></label>
-                <input asp-for="FullName" class="form-control" />
-                <span asp-validation-for="FullName" class="text-danger"></span>
+                        <div class="mb-3">
+                            <label asp-for="Specialty" class="form-label fw-bold"></label>
+                            <input asp-for="Specialty" class="form-control" placeholder="Örn: Yoga, Pilates, Crossfit" />
+                            <span asp-validation-for="Specialty" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ImageUrl" class="form-label fw-bold"></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
+                                <input asp-for="ImageUrl" class="form-control" id="imageUrlInput" placeholder="https://example.com/photo.jpg" />
+                            </div>
+                            <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                            <div class="mt-3 text-center">
+                                <p class="text-muted small">Fotoğraf Önizleme:</p>
+                                <img id="imgPreview" src="https://via.placeholder.com/150" alt="Önizleme" class="img-thumbnail shadow-sm" style="width: 150px; height: 150px; object-fit: cover;" />
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-action="Index" class="btn btn-outline-secondary me-md-2">İptal</a>
+                            <button type="submit" class="btn btn-success px-5">Kaydet</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="Specialty" class="control-label"></label>
-                <input asp-for="Specialty" class="form-control" />
-                <span asp-validation-for="Specialty" class="text-danger"></span>
-            </div>
-
-            <div class="form-group mb-4">
-                <label asp-for="ImageUrl" class="control-label"></label>
-                <input asp-for="ImageUrl" class="form-control" />
-                <span asp-validation-for="ImageUrl" class="text-danger"></span>
-                <small class="form-text text-muted">Eğitmenin fotoğrafının doğrudan URL'sini girin.</small>
-            </div>
-
-            <div class="form-group mt-4 text-center">
-                <input type="submit" value="Eğitmeni Kaydet" class="btn btn-primary btn-lg w-50" />
-                <a asp-action="Index" class="btn btn-secondary mt-2 w-50">Listeye Geri Dön</a>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
@@ -45,4 +55,23 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <script>
+        // رابط الصورة المباشر لتحديث المعاينة
+        document.getElementById('imageUrlInput').addEventListener('input', function () {
+            const preview = document.getElementById('imgPreview');
+            const url = this.value;
+            if (url) {
+                preview.src = url;
+            } else {
+                preview.src = 'https://via.placeholder.com/150';
+            }
+        });
+
+        // التعامل مع أخطاء تحميل الصورة
+        document.getElementById('imgPreview').onerror = function() {
+            this.src = 'https://via.placeholder.com/150?text=Geçersiz+URL';
+        };
+    </script>
 }

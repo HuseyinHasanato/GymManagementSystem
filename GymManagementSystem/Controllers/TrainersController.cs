@@ -1,150 +1,139 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using GymManagementSystem.Data;
+﻿using GymManagementSystem.Data;
 using GymManagementSystem.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
-
-[Authorize(Roles = "Admin")] // Sadece yöneticilerin erişimine izin ver
-public class TrainersController : Controller
+namespace GymManagementSystem.Controllers
 {
-    private readonly ApplicationDbContext _context;
-
-    public TrainersController(ApplicationDbContext context)
+    [Authorize(Roles = "Admin")]
+    public class TrainersController : Controller
     {
-        _context = context;
-    }
+        private readonly ApplicationDbContext _context;
+        private readonly ILogger<TrainersController> _logger;
 
-    // GET: /Trainers/Index (Tüm Eğitmenleri Listele)
-    public async Task<IActionResult> Index()
-    {
-        // Eğitmen listesini veritabanından asenkron olarak alır
-        return View(await _context.Trainers.ToListAsync());
-    }
-
-    // GET: /Trainers/Details/{id} (Eğitmen Detayları)
-    public async Task<IActionResult> Details(int? id)
-    {
-        if (id == null)
+        public TrainersController(ApplicationDbContext context, ILogger<TrainersController> logger)
         {
-            return NotFound(); // Hata: ID belirtilmedi
+            _context = context;
+            _logger = logger;
         }
 
-        var trainer = await _context.Trainers
-            .FirstOrDefaultAsync(m => m.Id == id);
-
-        if (trainer == null)
+        // 1. عرض جميع المدربين (مع تحسين الأداء)
+        [HttpGet]
+        public async Task<IActionResult> Index()
         {
-            return NotFound(); // Hata: Eğitmen bulunamadı
+            var trainers = await _context.Trainers.AsNoTracking().ToListAsync();
+            return View(trainers);
         }
 
-        return View(trainer);
-    }
-
-    // GET: /Trainers/Create (Eğitmen Oluşturma Formu)
-    public IActionResult Create()
-    {
-        return View();
-    }
-
-    // POST: /Trainers/Create (Yeni Eğitmeni Kaydet)
-    [HttpPost]
-    [ValidateAntiForgeryToken] // Güvenlik tokeni kontrolü
-    public async Task<IActionResult> Create([Bind("Id,FullName,Specialty,ImageUrl")] Trainer trainer)
-    {
-        if (ModelState.IsValid)
+        // 2. عرض صفحة إضافة مدرب جديد
+        [HttpGet]
+        public IActionResult Create()
         {
-            _context.Add(trainer); // Eğitmen nesnesini ekle
-            await _context.SaveChangesAsync(); // Değişiklikleri veritabanına kaydet
-            TempData["SuccessMessage"] = "Yeni eğitmen başarıyla oluşturuldu.";
-            return RedirectToAction(nameof(Index));
-        }
-        // Doğrulama hatası varsa aynı formu geri göster
-        return View(trainer);
-    }
-
-    // GET: /Trainers/Edit/{id} (Eğitmen Düzenleme Formu)
-    public async Task<IActionResult> Edit(int? id)
-    {
-        if (id == null)
-        {
-            return NotFound();
+            return View();
         }
 
-        var trainer = await _context.Trainers.FindAsync(id);
-        if (trainer == null)
+        // 3. معالجة إضافة مدرب جديد (حماية Bind)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("Id,FullName,Specialty,Bio,ImageUrl")] Trainer trainer)
         {
-            return NotFound();
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Add(trainer);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Eğitmen başarıyla eklendi.";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Eğitmen eklenirken hata oluştu.");
+                    ModelState.AddModelError("", "Sistem hatası: Kayıt yapılamadı.");
+                }
+            }
+            return View(trainer);
         }
-        return View(trainer);
-    }
 
-    // POST: /Trainers/Edit/{id} (Değişiklikleri Kaydet)
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("Id,FullName,Specialty,ImageUrl")] Trainer trainer)
-    {
-        if (id != trainer.Id)
+        // 4. عرض صفحة تعديل المدرب
+        [HttpGet]
+        public async Task<IActionResult> Edit(int? id)
         {
-            return NotFound();
+            if (id == null) return NotFound();
+
+            var trainer = await _context.Trainers.FindAsync(id);
+            if (trainer == null) return NotFound();
+
+            return View(trainer);
         }
 
-        if (ModelState.IsValid)
+        // 5. معالجة تعديل بيانات المدرب
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, [Bind("Id,FullName,Specialty,Bio,ImageUrl")] Trainer trainer)
         {
+            if (id != trainer.Id) return NotFound();
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(trainer);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Eğitmen bilgileri güncellendi.";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!TrainerExists(trainer.Id)) return NotFound();
+                    else throw;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Eğitmen güncellenirken hata.");
+                    ModelState.AddModelError("", "Güncelleme başarısız oldu.");
+                }
+            }
+            return View(trainer);
+        }
+
+        // 6. حذف مدرب (مع معالجة القيود)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var trainer = await _context.Trainers
+                .Include(t => t.GroupClasses)
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (trainer == null) return NotFound();
+
+            // التحقق مما إذا كان المدرب مرتبطاً بحصص قبل الحذف
+            if (trainer.GroupClasses != null && trainer.GroupClasses.Any())
+            {
+                TempData["ErrorMessage"] = "Bu eğitmen silinemez çünkü atanmış dersleri bulunmaktadır.";
+                return RedirectToAction(nameof(Index));
+            }
+
             try
             {
-                _context.Update(trainer); // Eğitmen bilgilerini güncelle
+                _context.Trainers.Remove(trainer);
                 await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Eğitmen bilgileri başarıyla güncellendi.";
+                TempData["SuccessMessage"] = "Eğitmen başarıyla silindi.";
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception ex)
             {
-                if (!_context.Trainers.Any(e => e.Id == trainer.Id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw; // Eşzamanlılık hatası (Concurrency)
-                }
+                _logger.LogError(ex, "Eğitmen silme hatası.");
+                TempData["ErrorMessage"] = "Silme işlemi sırasında teknik bir hata oluştu.";
             }
+
             return RedirectToAction(nameof(Index));
         }
-        return View(trainer);
-    }
 
-    // GET: /Trainers/Delete/{id} (Silme Onay Formu)
-    public async Task<IActionResult> Delete(int? id)
-    {
-        if (id == null)
+        private bool TrainerExists(int id)
         {
-            return NotFound();
+            return _context.Trainers.Any(e => e.Id == id);
         }
-
-        var trainer = await _context.Trainers
-            .FirstOrDefaultAsync(m => m.Id == id);
-
-        if (trainer == null)
-        {
-            return NotFound();
-        }
-
-        return View(trainer);
-    }
-
-    // POST: /Trainers/Delete/{id} (Silme İşlemini Onayla)
-    [HttpPost, ActionName("Delete")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(int id)
-    {
-        var trainer = await _context.Trainers.FindAsync(id);
-        if (trainer != null)
-        {
-            _context.Trainers.Remove(trainer); // Eğitmeni kaldır
-        }
-
-        await _context.SaveChangesAsync();
-        TempData["SuccessMessage"] = "Eğitmen kaydı başarıyla silindi.";
-        return RedirectToAction(nameof(Index));
     }
 }

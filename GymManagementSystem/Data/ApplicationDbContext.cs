@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Identity;
 
 namespace GymManagementSystem.Data
 {
-    // نستخدم IdentityUser كنوع عام (Generic Type)
     public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
@@ -13,44 +12,46 @@ namespace GymManagementSystem.Data
         {
         }
 
-        // ***** جداول بيانات المشروع الأساسية *****
+        // جداول البيانات الأساسية
         public DbSet<Trainer> Trainers { get; set; }
         public DbSet<GroupClass> GroupClasses { get; set; }
         public DbSet<Appointment> Appointments { get; set; }
-
-        // ***** جدول مطلوب لتكامل الذكاء الاصطناعي (AI Integration) *****
-        // [cite: 31]
         public DbSet<UserProfile> UserProfiles { get; set; }
         public DbSet<ClassEnrollment> ClassEnrollments { get; set; }
-        // public DbSet<ClassEnrollment> ClassEnrollments { get; set; } // تم التعليق عليه مؤقتاً لعدم وضوح دوره
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            // هذا السطر إلزامي لتشغيل جداول Identity (المستخدمين والأدوار)
             base.OnModelCreating(builder);
 
-            // *****************************************************************
-            // توضيح علاقة المفتاح الأجنبي لـ UserProfile
-            // يضمن أن كل UserProfile مرتبط بـ IdentityUser واحد
-            builder.Entity<UserProfile>()
-                .HasOne(up => up.Member) // يربط بـ خاصية Member في UserProfile
-                .WithMany()
-                .HasForeignKey(up => up.MemberId)
-                .IsRequired();
-            // *****************************************************************
+            // 1. إعداد علاقة UserProfile مع IdentityUser
+            // يضمن أن ملف البيانات الشخصية مرتبط بمستخدم واحد فقط
+            builder.Entity<UserProfile>(entity =>
+            {
+                entity.HasOne(up => up.Member)
+                      .WithMany()
+                      .HasForeignKey(up => up.MemberId)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.Cascade); // إذا حُذف المستخدم، يُحذف ملفه الشخصي تلقائياً
+            });
 
-
-            // ملاحظة: إذا كنت تنوي استخدام ClassEnrollment، فيجب أن يكون لديه نموذج (Model) خاص به.
-             // إذا كنت تستخدم ClassEnrollment، يجب أن يكون الكود كما يلي:
+            // 2. إعداد مفتاح مركب لـ ClassEnrollment (سجل التسجيل في الحصص)
+            // يمنع المستخدم من التسجيل في نفس الحصة مرتين
             builder.Entity<ClassEnrollment>()
                 .HasKey(ce => new { ce.GroupClassId, ce.UserId });
 
+            // 3. تنظيم علاقة الحصص الجماعية بالمدربين
+            builder.Entity<GroupClass>()
+                .HasOne(gc => gc.Trainer)
+                .WithMany(t => t.GroupClasses)
+                .HasForeignKey(gc => gc.TrainerId)
+                .OnDelete(DeleteBehavior.Restrict); // يمنع حذف مدرب إذا كان لديه حصص مجدولة (للأمان)
+
+            // 4. إعداد علاقات ClassEnrollment مع المستخدم والحصة
             builder.Entity<ClassEnrollment>()
                 .HasOne<IdentityUser>()
                 .WithMany()
                 .HasForeignKey(ce => ce.UserId)
-                .OnDelete(DeleteBehavior.Restrict); 
-            
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

@@ -1,103 +1,128 @@
 ﻿using GymManagementSystem.Data;
 using GymManagementSystem.Models;
-using GymManagementSystem.Services; // لاستخدام خدمة AI
+using GymManagementSystem.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
-// تقييد الوصول للأعضاء المسجلين فقط
-[Authorize(Roles = "Member, Admin")]
-public class AIController : Controller
+namespace GymManagementSystem.Controllers
 {
-    private readonly ApplicationDbContext _context;
-    private readonly IAIService _aiService;
-    private readonly UserManager<IdentityUser> _userManager;
-
-    public AIController(ApplicationDbContext context, IAIService aiService, UserManager<IdentityUser> userManager)
+    [Authorize(Roles = "Member, Admin")]
+    public class AIController : Controller
     {
-        _context = context;
-        _aiService = aiService;
-        _userManager = userManager;
-    }
+        private readonly ApplicationDbContext _context;
+        private readonly IAIService _aiService;
+        private readonly ILogger<AIController> _logger;
 
-    // GET: /AI/Profile
-    // لعرض واجهة إدخال بيانات المستخدم أو تعديلها
-    public async Task<IActionResult> Profile()
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        // محاولة جلب ملف البيانات الحالي للمستخدم
-        var profile = await _context.UserProfiles.FirstOrDefaultAsync(p => p.MemberId == userId);
-
-        if (profile == null)
+        public AIController(
+            ApplicationDbContext context,
+            IAIService aiService,
+            ILogger<AIController> logger)
         {
-            // إذا لم يكن لديه ملف بيانات، نبدأ بملف جديد
-            profile = new UserProfile { MemberId = userId };
+            _context = context;
+            _aiService = aiService;
+            _logger = logger;
         }
 
-        return View(profile);
-    }
-
-    // POST: /AI/SaveProfile
-    // لحفظ بيانات المستخدم واستدعاء خدمة AI
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> SaveProfile(UserProfile profile)
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        profile.MemberId = userId;
-
-        // إزالة التحقق من ModelState لكيانات التنقل التي لم نملأها
-        ModelState.Remove("Member");
-
-        if (ModelState.IsValid)
+        // 1. عرض صفحة إدخال البيانات (الطول، الوزن، الهدف)
+        [HttpGet]
+        public async Task<IActionResult> Profile()
         {
-            var existingProfile = await _context.UserProfiles.FirstOrDefaultAsync(p => p.MemberId == userId);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return Challenge();
 
-            if (existingProfile == null)
+            var profile = await _context.UserProfiles.FirstOrDefaultAsync(p => p.MemberId == userId);
+
+            if (profile == null)
             {
-                // إذا كان ملف البيانات غير موجود، قم بإضافته
-                _context.Add(profile);
-            }
-            else
-            {
-                // إذا كان موجودًا، قم بتحديثه
-                existingProfile.HeightCm = profile.HeightCm;
-                existingProfile.WeightKg = profile.WeightKg;
-                existingProfile.Age = profile.Age;
-                existingProfile.FitnessGoal = profile.FitnessGoal;
-                _context.Update(existingProfile);
+                profile = new UserProfile { MemberId = userId };
             }
 
-            await _context.SaveChangesAsync();
-
-            // التوجيه إلى صفحة عرض الخطة بعد الحفظ الناجح
-            return RedirectToAction("GeneratePlan");
+            return View(profile);
         }
 
-        return View("Profile", profile);
-    }
-
-    // GET: /AI/GeneratePlan
-    // لعرض الخطة التي تم توليدها بواسطة الذكاء الاصطناعي
-    public async Task<IActionResult> GeneratePlan()
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        // يجب جلب أحدث بيانات للمستخدم
-        var profile = await _context.UserProfiles.FirstOrDefaultAsync(p => p.MemberId == userId);
-
-        if (profile == null)
+        // 2. حفظ البيانات والانتقال لتوليد الخطة
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveProfile(UserProfile profile)
         {
-            // إذا لم يكمل المستخدم بياناته، نطلب منه ذلك أولاً
-            return RedirectToAction("Profile");
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            profile.MemberId = userId;
+
+            ModelState.Remove("Member");
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var existingProfile = await _context.UserProfiles.FirstOrDefaultAsync(p => p.MemberId == userId);
+
+                    if (existingProfile == null)
+                    {
+                        _context.Add(profile);
+                    }
+                    else
+                    {
+                        existingProfile.HeightCm = profile.HeightCm;
+                        existingProfile.WeightKg = profile.WeightKg;
+                        existingProfile.Age = profile.Age;
+                        existingProfile.FitnessGoal = profile.FitnessGoal;
+                        _context.Update(existingProfile);
+                    }
+
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Profiliniz güncellendi. Planınız hazırlanıyor...";
+
+                    return RedirectToAction(nameof(GeneratePlan));
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Profil kaydetme hatası.");
+                    ModelState.AddModelError("", "Veritabanına kaydedilirken bir hata oluştu.");
+                }
+            }
+            return View("Profile", profile);
         }
 
-        // استدعاء خدمة الذكاء الاصطناعي
-        ViewData["WorkoutPlan"] = await _aiService.GenerateWorkoutPlanAsync(profile);
+        // 3. الأكشن المسؤول عن استدعاء Gemini وعرض النتيجة
+        [HttpGet]
+        public async Task<IActionResult> GeneratePlan()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // جلب البيانات بدون تتبع لتسريع الأداء
+            var profile = await _context.UserProfiles.AsNoTracking().FirstOrDefaultAsync(p => p.MemberId == userId);
 
-        return View(profile);
+            if (profile == null)
+            {
+                return RedirectToAction(nameof(Profile));
+            }
+
+            try
+            {
+                _logger.LogInformation("Gemini AI Planı oluşturuluyor: {UserId}", userId);
+
+                // استدعاء خدمة Gemini التي قمنا بإعدادها بمفتاح AIza...
+                var workoutPlan = await _aiService.GenerateWorkoutPlanAsync(profile);
+
+                if (string.IsNullOrEmpty(workoutPlan))
+                {
+                    ViewBag.WorkoutPlan = "⚠️ AI yanıt üretemedi. Lütfen API anahtarını kontrol edin.";
+                }
+                else
+                {
+                    // تمرير النص (Markdown) إلى الصفحة
+                    ViewBag.WorkoutPlan = workoutPlan;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "AI Plan hatası.");
+                ViewBag.WorkoutPlan = $"❌ Hata: {ex.Message}";
+            }
+
+            return View(profile);
+        }
     }
 }

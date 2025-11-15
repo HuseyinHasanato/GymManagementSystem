@@ -4,10 +4,9 @@ namespace GymManagementSystem.Services
 {
     public interface IAIService
     {
-        // دالة ترجع خطة التمارين كنص بناءً على بيانات المستخدم
+        /// <summary>
+        /// توليد خطة تدريب مخصصة بناءً على البيانات البدنية للمشترك.
+        /// </summary>
         Task<string> GenerateWorkoutPlanAsync(UserProfile profile);
-
-        // يمكن إضافة دالة لـ 'توقع شكل الجسم' إذا كنت تستخدم DALL-E أو نموذج صور (مطلوب في الوصف)
-        // Task<string> GenerateBodyImageAsync(UserProfile profile, string prompt);
     }
 }

@@ -3,52 +3,66 @@
     ViewData["Title"] = "Randevu Al";
 }
 
-<div class="row">
-    <div class="col-md-6 offset-md-3">
-        <h2 class="text-center mb-4">🗓️ Yeni Randevu Oluştur</h2>
-        <p class="text-muted text-center">Lütfen almak istediğiniz dersi ve başlangıç zamanını seçiniz.</p>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h3 class="mb-0"><i class="bi bi-calendar-plus"></i> Yeni Randevu Oluştur</h3>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted text-center mb-4">Lütfen ders seçiminizi yapın. Bitiş saati otomatik hesaplanacaktır.</p>
 
-        @if (TempData["SuccessMessage"] != null)
-        {
-            <div class="alert alert-success">@TempData["SuccessMessage"]</div>
-        }
+                    <form asp-action="Book" method="post">
+                        @* إظهار جميع الأخطاء هنا لمعرفة سبب الفشل *@
+                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
-        <form asp-action="Book" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        @* حقل مخفي لوقت النهاية لتجاوز فحص الـ Validation في المتصفح *@
+                        <input type="hidden" asp-for="EndTime" value="@DateTime.Now.AddHours(1)" />
 
-            @* Alan: Grup Dersini Seçme *@
-            <div class="form-group mb-3">
-                <label asp-for="GroupClassId" class="control-label">Ders / Hizmet Seçin</label>
-                <select asp-for="GroupClassId" class="form-control" asp-items="ViewBag.GroupClassId">
-                    <option value="">-- Lütfen bir ders seçiniz --</option>
-                </select>
-                <span asp-validation-for="GroupClassId" class="text-danger"></span>
+                        @* 1. اختيار الحصة *@
+                        <div class="form-group mb-3">
+                            <label asp-for="GroupClassId" class="form-label fw-bold">Ders / Hizmet Seçin</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-gym"></i></span>
+                                <select asp-for="GroupClassId" class="form-select" asp-items="ViewBag.GroupClassId">
+                                    <option value="">-- Lütfen bir ders seçiniz --</option>
+                                </select>
+                            </div>
+                            <span asp-validation-for="GroupClassId" class="text-danger small"></span>
+                        </div>
+
+                        @* 2. وقت البدء *@
+                        <div class="form-group mb-3">
+                            <label asp-for="StartTime" class="form-label fw-bold">Başlangıç Tarihi ve Saati</label>
+                            <input asp-for="StartTime" type="datetime-local" class="form-control"
+                                   value="@DateTime.Now.AddHours(1).ToString("yyyy-MM-ddTHH:mm")" />
+                            <span asp-validation-for="StartTime" class="text-danger small"></span>
+                        </div>
+
+                        @* 3. الملاحظات *@
+                        <div class="form-group mb-4">
+                            <label asp-for="Notes" class="form-label fw-bold">Üye Notları (Opsiyonel)</label>
+                            <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Eğitmene iletmek istediğiniz bir not var mı?"></textarea>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg shadow-sm">
+                                <i class="bi bi-check-circle"></i> Randevuyu Kaydet
+                            </button>
+                            <a asp-action="MyAppointments" class="btn btn-link text-secondary">
+                                <i class="bi bi-arrow-left"></i> Randevularıma Geri Dön
+                            </a>
+                        </div>
+                    </form>
+                </div>
             </div>
-
-            @* Alan: Başlangıç Zamanı Seçme *@
-            <div class="form-group mb-4">
-                <label asp-for="StartTime" class="control-label">Başlangıç Tarihi ve Saati</label>
-                <input asp-for="StartTime" type="datetime-local" class="form-control" />
-                <span asp-validation-for="StartTime" class="text-danger"></span>
-                <small class="form-text text-muted">Randevunuz seçtiğiniz ders süresine göre otomatik olarak sona erecektir.</small>
-            </div>
-
-            @* Alan: Üye Notları (Opsiyonel) *@
-            <div class="form-group mb-4">
-                <label asp-for="Notes" class="control-label">Üye Notları (Opsiyonel)</label>
-                <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
-                <span asp-validation-for="Notes" class="text-danger"></span>
-            </div>
-
-            <div class="form-group text-center">
-                <button type="submit" class="btn btn-primary btn-lg w-75">Randevuyu Kaydet</button>
-                <a asp-action="MyAppointments" class="btn btn-outline-secondary mt-3">Randevularıma Geri Dön</a>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
 @section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }

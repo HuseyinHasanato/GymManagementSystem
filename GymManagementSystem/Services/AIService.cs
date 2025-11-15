@@ -1,9 +1,8 @@
 ﻿using GymManagementSystem.Models;
 using Microsoft.Extensions.Configuration;
-using System.Text;
+using System.Net.Http.Json;
 using System.Text.Json;
-using System.Net.Http.Headers;
-using System.Security.Claims;
+using System.Text;
 
 namespace GymManagementSystem.Services
 {
@@ -11,77 +10,75 @@ namespace GymManagementSystem.Services
     {
         private readonly HttpClient _httpClient;
         private readonly string _apiKey;
-        private readonly bool _isServiceEnabled; // متغير لتتبع حالة تمكين الخدمة
 
         public AIService(HttpClient httpClient, IConfiguration configuration)
         {
             _httpClient = httpClient;
-
-            // محاولة قراءة المفتاح
-            _apiKey = configuration["GeminiSettings:ApiKey"];
-
-            if (string.IsNullOrEmpty(_apiKey) || _apiKey.Contains("YOUR_"))
-            {
-                // إذا كان المفتاح مفقوداً أو وهمياً، قم بتعطيل الخدمة
-                _isServiceEnabled = false;
-                // يمكنك طباعة رسالة للمطور في نافذة Console
-                Console.WriteLine("⚠️ تحذير: مفتاح AI غير موجود. خدمة الذكاء الاصطناعي معطلة.");
-            }
-            else
-            {
-                // إذا كان المفتاح موجوداً
-                _isServiceEnabled = true;
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
-                _httpClient.BaseAddress = new Uri("https://api.openai.com/v1/");
-            }
+            // قراءة المفتاح من appsettings.json
+            _apiKey = configuration["GeminiKey"] ?? "";
         }
 
         public async Task<string> GenerateWorkoutPlanAsync(UserProfile profile)
         {
-            // التحقق أولاً من تمكين الخدمة
-            if (!_isServiceEnabled)
-            {
-                return "⚠️ **عذراً، خدمة توليد خطة التدريب غير متاحة حالياً.** يرجى الاتصال بإدارة الصالة الرياضية لتفعيل الخدمة.";
-            }
+            if (string.IsNullOrEmpty(_apiKey))
+                return "❌ Gemini API Key eksik! Lütfen appsettings.json dosyasını kontrol edin.";
 
-            // ********** المنطق الأصلي لتوليد الخطة **********
-            string prompt = $"Yaşım {profile.Age}, kilom {profile.WeightKg} kg, boyum {profile.HeightCm} cm ve fitness hedefim {profile.FitnessGoal}. " +
-                            "Hedefime odaklanan, detaylı bir 5 günlük egzersiz planı oluştur. Yanıt, TÜRKÇE olmalı ve okunaklı olması için Markdown kullanılarak açıkça biçimlendirilmelidir.";
+            // استخدام موديل Gemini 1.5 Flash (الأسرع والأفضل للمشاريع الطلابية)
+            string url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={_apiKey}";
+
+            // بناء الطلب (Prompt) بطريقة احترافية لضمان جودة الجدول
+            var promptText = new StringBuilder();
+            promptText.AppendLine("Sen uzman bir fitness eğitmeni ve beslenme uzmanısın.");
+            promptText.AppendLine($"Kullanıcı Profili: Yaş {profile.Age}, Boy {profile.HeightCm}cm, Kilo {profile.WeightKg}kg.");
+            promptText.AppendLine($"Ana Hedef: {profile.FitnessGoal}.");
+            promptText.AppendLine("Lütfen aşağıdaki kriterlere göre profesyonel bir program hazırla:");
+            promptText.AppendLine("1. 5 günlük detaylı antrenman planı.");
+            promptText.AppendLine("2. Her gün için set ve tekrar sayıları.");
+            promptText.AppendLine("3. Hedefe uygun kısa beslenme tavsiyeleri.");
+            promptText.AppendLine("4. Yanıtı tamamen TÜRKÇE ve şık bir Markdown formatında ver.");
+
+            var requestBody = new
+            {
+                contents = new[] {
+                    new {
+                        parts = new[] {
+                            new { text = promptText.ToString() }
+                        }
+                    }
+                },
+                generationConfig = new
+                {
+                    temperature = 0.7, // توازن بين الإبداع والدقة
+                    maxOutputTokens = 2048
+                }
+            };
 
             try
             {
-                var requestBody = new
-                {
-                    model = "gpt-3.5-turbo",
-                    messages = new[]
-                    {
-                        new { role = "system", content = "أنت مدرب لياقة شخصي وخبير في التغذية. مهمتك هي توليد خطة تمارين بناءً على البيانات المقدمة."},
-                        new { role = "user", content = prompt }
-                    },
-                    max_tokens = 2500,
-                    temperature = 0.7
-                };
-
-                var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-                var response = await _httpClient.PostAsync("chat/completions", content);
+                var response = await _httpClient.PostAsJsonAsync(url, requestBody);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    // تحليل الرد
-                    using (JsonDocument doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync()))
+                    var result = await response.Content.ReadFromJsonAsync<JsonElement>();
+
+                    // استخراج النص مع التحقق من وجود البيانات لتجنب الـ Null Reference
+                    if (result.TryGetProperty("candidates", out var candidates) && candidates.GetArrayLength() > 0)
                     {
-                        var messageContent = doc.RootElement.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
-                        return messageContent ?? "فشلت عملية تحليل الرد من الذكاء الاصطناعي.";
+                        var content = candidates[0].GetProperty("content").GetProperty("parts")[0].GetProperty("text").GetString();
+                        return content ?? "Hata: İçerik oluşturulamadı.";
                     }
+                    return "❌ AI yanıt üretemedi, lütfen tekrar deneyin.";
                 }
 
-                // رسالة الخطأ في حالة المفتاح غير الصالح أو نفاد الرصيد
-                var errorContent = await response.Content.ReadAsStringAsync();
-                return $"عذراً، فشلت عملية توليد الخطة. رمز الخطأ: {response.StatusCode}. (قد يكون المفتاح غير صحيح أو لا يوجد رصيد). التفاصيل: {errorContent}";
+                // معالجة رسائل الخطأ الشائعة
+                if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                    return "❌ Hata: Geçersiz istek veya API anahtarı hatası.";
+
+                return $"❌ AI Hatası: {response.StatusCode}";
             }
             catch (Exception ex)
             {
-                return $"حدث خطأ في الاتصال بالذكاء الاصطناعي: {ex.Message}";
+                return $"❌ Sistem Hatası: {ex.Message}";
             }
         }
     }
