@@ -1,0 +1,30 @@
+﻿@model GymManagementSystem.Models.UserProfile
+@{
+    ViewData["Title"] = "Önerilen Egzersiz Planı";
+}
+
+<h2 class="text-center mb-4">✨ Yapay Zeka Tarafından Oluşturulan Kişisel Egzersiz Planı</h2>
+
+<div class="alert alert-info" role="alert">
+    <strong>Profiliniz:</strong> Boy: @Model.HeightCm cm, Kilo: @Model.WeightKg kg, Hedef: @Model.FitnessGoal
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h4>Detaylı Plan</h4>
+    </div>
+    <div class="card-body">
+        @{
+            var plan = ViewData["WorkoutPlan"] as string;
+
+            if (!string.IsNullOrEmpty(plan))
+            {
+                <pre style="white-space: pre-wrap; font-family: inherit; background-color: #f8f9fa; padding: 15px; border-radius: 5px;">@plan</pre>
+            }
+            else
+            {
+                <p class="text-danger">Plan oluşturulamadı. Lütfen API Anahtarınızı kontrol edin.</p>
+            }
+        }
+    </div>
+</div>

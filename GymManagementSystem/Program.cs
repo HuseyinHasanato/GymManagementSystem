@@ -1,7 +1,10 @@
 using GymManagementSystem.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using GymManagementSystem.Data.Initializer; // ÇÓÊíÑÇÏ İÆÉ Initializer
+using GymManagementSystem.Data.Initializer;
+using GymManagementSystem.Services; // ÇÓÊíÑÇÏ ÇáÎÏãÇÊ (áÜ IAIService)
+// Êã ÍĞİ: using OpenAI.Interfaces; 
+// Êã ÍĞİ: using OpenAI; 
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,14 +14,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-// 2. ÅÚÏÇÏÇÊ ÇáåæíÉ (Identity) ÇáäåÇÆíÉ áÍá ãÔÇßá ÊÓÌíá ÇáÏÎæá
+// 2. ÅÚÏÇÏÇÊ ÇáåæíÉ (Identity) ÇáäåÇÆíÉ
 builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 {
-    // ÇáÍá ÇáÃæá: ÊÚØíá ÔÑØ ÊÃßíÏ ÇáÈÑíÏ ÇáÅáßÊÑæäí (áÊİÇÏí Invalid login attempt)
     options.SignIn.RequireConfirmedAccount = false;
-
-    // ÇáÍá ÇáËÇäí: ÊÎİíİ ãÊØáÈÇÊ ßáãÉ ÇáÓÑ (áÊİÇÏí ÎØÃ NonAlphanumeric)
-    options.Password.RequireNonAlphanumeric = false; // <-- åĞÇ åæ ÇáÊÚÏíá ÇáÍÇÓã
+    options.Password.RequireNonAlphanumeric = false;
     options.Password.RequiredLength = 6;
     options.Password.RequireDigit = true;
     options.Password.RequireUppercase = true;
@@ -26,6 +26,17 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 })
 .AddRoles<IdentityRole>() // ÖÑæÑí áÇÓÊÎÏÇã RoleManager æÏÚã ÇáÃÏæÇÑ
 .AddEntityFrameworkStores<ApplicationDbContext>();
+
+// ********** ÅÖÇİÉ ÎÏãÇÊ ÇáĞßÇÁ ÇáÇÕØäÇÚí (AI Integration) **********
+
+// 3. äŞæã İŞØ ÈÅÖÇİÉ ÎÏãÉ HttpClient áÏÚã ÇáÇÊÕÇá ÇáãÈÇÔÑ ãä AIService
+builder.Services.AddHttpClient();
+
+// 4. ÊÓÌíá ÎÏãÊäÇ ÇáãÎÕÕÉ ááÜ AI (áÊãßíä ÍŞä ÇáÊÈÚíÉ İí æÍÏÉ ÇáÊÍßã)
+// åĞå ÇáÎÏãÉ ÊÚÊãÏ ÇáÂä Úáì HttpClient æ IConfiguration
+builder.Services.AddScoped<IAIService, AIService>();
+
+// ********************************************************************
 
 // ÊÓÌíá ÎÏãÉ DbInitializer ááÇÓÊÎÏÇã ÚÈÑ Dependency Injection
 builder.Services.AddScoped<DbInitializer>();

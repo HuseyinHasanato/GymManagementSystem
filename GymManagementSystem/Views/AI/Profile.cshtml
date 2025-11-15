@@ -1,0 +1,54 @@
+﻿@model GymManagementSystem.Models.UserProfile
+@{
+    ViewData["Title"] = "Kullanıcı Profili ve Yapay Zeka Önerileri";
+}
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h2 class="text-center mb-4">🏋️ Yapay Zeka Girişleri</h2>
+        <p class="text-muted text-center">Kişisel bir egzersiz planı almak için lütfen verilerinizi girin.</p>
+
+        <form asp-action="SaveProfile" method="post">
+            <input type="hidden" asp-for="Id" />
+
+            <div class="form-group mb-3">
+                <label asp-for="HeightCm"></label>
+                <input asp-for="HeightCm" class="form-control" type="number" />
+                <span asp-validation-for="HeightCm" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="WeightKg"></label>
+                <input asp-for="WeightKg" class="form-control" type="number" step="0.1" />
+                <span asp-validation-for="WeightKg" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Age"></label>
+                <input asp-for="Age" class="form-control" type="number" />
+                <span asp-validation-for="Age" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-4">
+                <label asp-for="FitnessGoal"></label>
+                <select asp-for="FitnessGoal" class="form-control">
+                    <option value="">-- Hedefinizi Seçin --</option>
+                    <option value="Kas Kazanımı (Muscle Gain)">Kas Kazanımı</option>
+                    <option value="Kilo Kaybı (Weight Loss)">Kilo Kaybı</option>
+                    <option value="Dayanıklılık ve Genel Fitness (Endurance)">Dayanıklılık ve Genel Fitness</option>
+                </select>
+                <span asp-validation-for="FitnessGoal" class="text-danger"></span>
+            </div>
+
+            <div class="form-group text-center">
+                <button type="submit" class="btn btn-success btn-lg">Verileri Kaydet ve Plan Al</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
