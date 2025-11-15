@@ -4,47 +4,37 @@ using GymManagementSystem.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace GymManagementSystem.Data.Migrations
+namespace GymManagementSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251212214629_FinalSecuritySetup")]
-    partial class FinalSecuritySetup
+    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.14")
+                .HasAnnotation("ProductVersion", "8.0.22")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("GymManagementSystem.Models.ClassEnrollment", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("EnrollmentDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("GroupClassId")
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(448)
+                        .HasColumnType("nvarchar(448)");
 
-                    b.HasKey("Id");
+                    b.Property<DateTime>("EnrollmentDate")
+                        .HasColumnType("datetime2");
 
-                    b.HasIndex("GroupClassId");
+                    b.HasKey("GroupClassId", "UserId");
 
                     b.HasIndex("UserId");
 
@@ -60,6 +50,7 @@ namespace GymManagementSystem.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GroupClassId"));
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("MaxCapacity")
@@ -67,8 +58,7 @@ namespace GymManagementSystem.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
@@ -313,18 +303,17 @@ namespace GymManagementSystem.Data.Migrations
             modelBuilder.Entity("GymManagementSystem.Models.ClassEnrollment", b =>
                 {
                     b.HasOne("GymManagementSystem.Models.GroupClass", "GroupClass")
-                        .WithMany("Enrollments")
+                        .WithMany("ClassEnrollments")
                         .HasForeignKey("GroupClassId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("GroupClass");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("GymManagementSystem.Models.GroupClass", b =>
@@ -391,7 +380,7 @@ namespace GymManagementSystem.Data.Migrations
 
             modelBuilder.Entity("GymManagementSystem.Models.GroupClass", b =>
                 {
-                    b.Navigation("Enrollments");
+                    b.Navigation("ClassEnrollments");
                 });
 
             modelBuilder.Entity("GymManagementSystem.Models.Trainer", b =>

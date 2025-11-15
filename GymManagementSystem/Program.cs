@@ -1,7 +1,7 @@
 using GymManagementSystem.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using GymManagementSystem.Data.Initializer; // 1. ? ÇÓÊíÑÇÏ İÆÉ Initializer
+using GymManagementSystem.Data.Initializer; // ÇÓÊíÑÇÏ İÆÉ Initializer
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,26 +11,33 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-// 2. ? ÅÖÇİÉ ÏÚã ÇáÃÏæÇÑ (Roles) æÊÓÌíá ÎÏãÉ Initializer
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddRoles<IdentityRole>() // ? åĞÇ ÖÑæÑí áÇÓÊÎÏÇã RoleManager
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+// 2. ÅÚÏÇÏÇÊ ÇáåæíÉ (Identity) ÇáäåÇÆíÉ áÍá ãÔÇßá ÊÓÌíá ÇáÏÎæá
+builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+{
+    // ÇáÍá ÇáÃæá: ÊÚØíá ÔÑØ ÊÃßíÏ ÇáÈÑíÏ ÇáÅáßÊÑæäí (áÊİÇÏí Invalid login attempt)
+    options.SignIn.RequireConfirmedAccount = false;
+
+    // ÇáÍá ÇáËÇäí: ÊÎİíİ ãÊØáÈÇÊ ßáãÉ ÇáÓÑ (áÊİÇÏí ÎØÃ NonAlphanumeric)
+    options.Password.RequireNonAlphanumeric = false; // <-- åĞÇ åæ ÇáÊÚÏíá ÇáÍÇÓã
+    options.Password.RequiredLength = 6;
+    options.Password.RequireDigit = true;
+    options.Password.RequireUppercase = true;
+
+})
+.AddRoles<IdentityRole>() // ÖÑæÑí áÇÓÊÎÏÇã RoleManager æÏÚã ÇáÃÏæÇÑ
+.AddEntityFrameworkStores<ApplicationDbContext>();
 
 // ÊÓÌíá ÎÏãÉ DbInitializer ááÇÓÊÎÏÇã ÚÈÑ Dependency Injection
-builder.Services.AddScoped<DbInitializer>(); // ? ÊÓÌíá ÇáÎÏãÉ
+builder.Services.AddScoped<DbInitializer>();
 
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// ----------------------------------------------------------------------
-// 3. ? ÇÓÊÏÚÇÁ ÏÇáÉ ÊåíÆÉ ÇáÃÏæÇÑ æŞÇÚÏÉ ÇáÈíÇäÇÊ ÚäÏ ÈÏÁ ÇáÊÔÛíá
-// ----------------------------------------------------------------------
+// ÊåíÆÉ ŞÇÚÏÉ ÇáÈíÇäÇÊ ÚäÏ ÇáÊÔÛíá (Seed Data)
 await InitializeDatabase(app);
-// ----------------------------------------------------------------------
 
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
@@ -46,7 +53,6 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// 4. ? ÇáÊÑÊíÈ ÇáÕÍíÍ ááÃãÇä: UseAuthentication íÌÈ Ãä íßæä ŞÈá UseAuthorization
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -59,14 +65,11 @@ app.MapRazorPages();
 app.Run();
 
 
-// ----------------------------------------------------------------------
-// 5. ? ÇáÏÇáÉ ÇáãÓÇÚÏÉ áÊåíÆÉ ŞÇÚÏÉ ÇáÈíÇäÇÊ (Roles & Admin User)
-// ----------------------------------------------------------------------
 async Task InitializeDatabase(IHost host)
 {
     using (var scope = host.Services.CreateScope())
     {
         var initializer = scope.ServiceProvider.GetRequiredService<DbInitializer>();
-        await initializer.Initialize(); // ÇÓÊÏÚÇÁ ÏÇáÉ Initialize
+        await initializer.Initialize();
     }
 }

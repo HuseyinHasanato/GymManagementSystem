@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Identity;
 
 namespace GymManagementSystem.Data
 {
-    // يجب أن يرث من IdentityDbContext<IdentityUser> لدعم نظام الأمان
     public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
@@ -13,35 +12,39 @@ namespace GymManagementSystem.Data
         {
         }
 
-        // جداول المشروع الأساسية
+        // تعريف جداول الـ DbSet
         public DbSet<Trainer> Trainers { get; set; }
         public DbSet<GroupClass> GroupClasses { get; set; }
-
-        // جدول الحجوزات (الربط بين العضو والحصة)
         public DbSet<ClassEnrollment> ClassEnrollments { get; set; }
 
-        // إعداد العلاقات (اختياري لكن مفضل لضمان عمل الـ Foreign Keys)
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            // هذا السطر إلزامي لتشغيل جداول Identity (المستخدمين والأدوار)
             base.OnModelCreating(builder);
 
-            // تعريف مفتاح مركب لمنع تسجيل العضو مرتين في نفس الحصة
+            // 1. تعريف المفتاح المركب (Composite Key) لجدول ClassEnrollment
+            // هذا يحل محل خاصية [Key] public int Id المحذوفة من الموديل
             builder.Entity<ClassEnrollment>()
                 .HasKey(ce => new { ce.GroupClassId, ce.UserId });
 
-            // علاقة GroupClass -> ClassEnrollment
+            // 2. تعريف العلاقة مع GroupClass (حصة المجموعة)
             builder.Entity<ClassEnrollment>()
                 .HasOne(ce => ce.GroupClass)
                 .WithMany(gc => gc.ClassEnrollments)
-                .HasForeignKey(ce => ce.GroupClassId);
+                .HasForeignKey(ce => ce.GroupClassId)
+                // يمنع حذف الحصة إذا كان هناك حجوزات (للحفاظ على تكامل البيانات)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            // علاقة IdentityUser -> ClassEnrollment
-            // علاقة IdentityUser -> ClassEnrollment
+            // 3. تعريف العلاقة مع IdentityUser (المستخدم)
+            // هذا هو التصحيح الذي يمنع ظهور خطأ UserId1
             builder.Entity<ClassEnrollment>()
                 .HasOne<IdentityUser>()
                 .WithMany()
-                .HasForeignKey(ce => ce.UserId) // هنا نحدد المفتاح الأجنبي يدوياً
-                .IsRequired(); // التأكيد على أنه مطلوب
+                .HasForeignKey(ce => ce.UserId)
+                // نستخدم IsRequired(false) ليتوافق مع string? UserId
+                .IsRequired(false)
+                // يمنع حذف المستخدم إذا كان لديه حجوزات
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

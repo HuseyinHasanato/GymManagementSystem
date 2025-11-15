@@ -23,7 +23,7 @@ namespace GymManagementSystem.Data.Initializer
             if (!_roleManager.RoleExistsAsync("Admin").GetAwaiter().GetResult())
             {
                 await _roleManager.CreateAsync(new IdentityRole("Admin"));
-                await _roleManager.CreateAsync(new IdentityRole("Uye")); // العضو (Üye)
+                await _roleManager.CreateAsync(new IdentityRole("Uye")); 
             }
 
             

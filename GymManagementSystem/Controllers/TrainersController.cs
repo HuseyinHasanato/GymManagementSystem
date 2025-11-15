@@ -4,7 +4,7 @@ using GymManagementSystem.Data;
 using GymManagementSystem.Models;
 using Microsoft.AspNetCore.Authorization;
 
-// تقييد الوصول: هذا الكنترولر متاح فقط للمدير (Admin)
+
 [Authorize(Roles = "Admin")]
 public class TrainersController : Controller
 {
@@ -15,13 +15,13 @@ public class TrainersController : Controller
         _context = context;
     }
 
-    // GET: Trainers (Read All)
+    
     public async Task<IActionResult> Index()
     {
         return View(await _context.Trainers.ToListAsync());
     }
 
-    // GET: Trainers/Details/5 (Read One)
+    
     public async Task<IActionResult> Details(int? id)
     {
         if (id == null)
@@ -39,13 +39,13 @@ public class TrainersController : Controller
         return View(trainer);
     }
 
-    // GET: Trainers/Create
+    
     public IActionResult Create()
     {
         return View();
     }
 
-    // POST: Trainers/Create (Create)
+    
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("Id,FullName,Specialty,ImageUrl")] Trainer trainer)
@@ -59,7 +59,7 @@ public class TrainersController : Controller
         return View(trainer);
     }
 
-    // GET: Trainers/Edit/5
+    
     public async Task<IActionResult> Edit(int? id)
     {
         if (id == null)
@@ -75,7 +75,7 @@ public class TrainersController : Controller
         return View(trainer);
     }
 
-    // POST: Trainers/Edit/5 (Update)
+    
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, [Bind("Id,FullName,Specialty,ImageUrl")] Trainer trainer)
@@ -108,7 +108,7 @@ public class TrainersController : Controller
         return View(trainer);
     }
 
-    // GET: Trainers/Delete/5
+   
     public async Task<IActionResult> Delete(int? id)
     {
         if (id == null)
@@ -126,7 +126,7 @@ public class TrainersController : Controller
         return View(trainer);
     }
 
-    // POST: Trainers/Delete/5 (Delete)
+   
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)

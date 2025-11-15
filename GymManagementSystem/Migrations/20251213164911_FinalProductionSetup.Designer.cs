@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace GymManagementSystem.Data.Migrations
+namespace GymManagementSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251212235514_AddEnrollmentSystemFinal")]
-    partial class AddEnrollmentSystemFinal
+    [Migration("20251213164911_FinalProductionSetup")]
+    partial class FinalProductionSetup
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,22 +31,15 @@ namespace GymManagementSystem.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(448)
+                        .HasColumnType("nvarchar(448)");
 
                     b.Property<DateTime>("EnrollmentDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId1")
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("GroupClassId", "UserId");
 
                     b.HasIndex("UserId");
-
-                    b.HasIndex("UserId1");
 
                     b.ToTable("ClassEnrollments");
                 });
@@ -315,22 +308,15 @@ namespace GymManagementSystem.Data.Migrations
                     b.HasOne("GymManagementSystem.Models.GroupClass", "GroupClass")
                         .WithMany("ClassEnrollments")
                         .HasForeignKey("GroupClassId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId1");
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("GroupClass");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("GymManagementSystem.Models.GroupClass", b =>

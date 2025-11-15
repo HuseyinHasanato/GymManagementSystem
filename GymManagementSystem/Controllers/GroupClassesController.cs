@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Linq;
 
-// تقييد الوصول: هذا الكنترولر متاح فقط للمدير (Admin)
+
 [Authorize(Roles = "Admin")]
 public class GroupClassesController : Controller
 {
@@ -17,17 +17,16 @@ public class GroupClassesController : Controller
         _context = context;
     }
 
-    // GET: GroupClasses (Read All)
-    // يسمح بالعرض للجميع لتحقيق متطلب "جدول الحصص"
+    
     [AllowAnonymous]
     public async Task<IActionResult> Index()
     {
-        // استخدام Include لجلب بيانات المدرب (Trainer) المرتبطة بالحصة
+        
         var applicationDbContext = _context.GroupClasses.Include(g => g.Trainer);
         return View(await applicationDbContext.ToListAsync());
     }
 
-    // GET: GroupClasses/Details/5 (Read One)
+    
     [AllowAnonymous]
     public async Task<IActionResult> Details(int? id)
     {
@@ -37,7 +36,7 @@ public class GroupClassesController : Controller
         }
 
         var groupClass = await _context.GroupClasses
-            .Include(g => g.Trainer) // جلب المدرب
+            .Include(g => g.Trainer)
             .FirstOrDefaultAsync(m => m.GroupClassId == id);
 
         if (groupClass == null)
@@ -48,21 +47,19 @@ public class GroupClassesController : Controller
         return View(groupClass);
     }
 
-    // GET: GroupClasses/Create
+    
     public IActionResult Create()
     {
-        // تمرير قائمة المدربين إلى الـ View للسماح باختيار TrainerId
+      
         ViewData["TrainerId"] = new SelectList(_context.Trainers, "Id", "FullName");
         return View();
     }
 
-    // POST: GroupClasses/Create (Create)
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("GroupClassId,Name,Description,StartTime,MaxCapacity,TrainerId")] GroupClass groupClass)
     {
-        // ملاحظة: يجب أن يكون ModelState.IsValid صحيحاً بعد إزالة حقل التنقل (Trainer) من Bind
-        // لكننا نعيد تعبئة ViewData في حال فشل Validation لأي سبب آخر
+        
         if (ModelState.IsValid)
         {
             _context.Add(groupClass);
@@ -73,7 +70,7 @@ public class GroupClassesController : Controller
         return View(groupClass);
     }
 
-    // GET: GroupClasses/Edit/5
+   
     public async Task<IActionResult> Edit(int? id)
     {
         if (id == null) return NotFound();
@@ -84,7 +81,7 @@ public class GroupClassesController : Controller
         return View(groupClass);
     }
 
-    // POST: GroupClasses/Edit/5 (Update)
+   
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, [Bind("GroupClassId,Name,Description,StartTime,MaxCapacity,TrainerId")] GroupClass groupClass)
@@ -115,19 +112,19 @@ public class GroupClassesController : Controller
         return View(groupClass);
     }
 
-    // GET: GroupClasses/Delete/5
+   
     public async Task<IActionResult> Delete(int? id)
     {
         if (id == null) return NotFound();
         var groupClass = await _context.GroupClasses
-            .Include(g => g.Trainer) // جلب المدرب للعرض في صفحة التأكيد
+            .Include(g => g.Trainer) 
             .FirstOrDefaultAsync(m => m.GroupClassId == id);
 
         if (groupClass == null) return NotFound();
         return View(groupClass);
     }
 
-    // POST: GroupClasses/Delete/5 (Delete)
+    
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
