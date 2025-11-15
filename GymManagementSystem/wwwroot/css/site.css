@@ -1,22 +1,83 @@
+/* 1.  ⁄—Ì› «·„ €Ì—«  «··Ê‰Ì… */
+:root {
+    --primary-color: #4B0082; /* »‰›”ÃÌ €«„ﬁ */
+    --accent-color: #00CED1; /*  —ﬂÊ«“ ·· „ÌÌ“ */
+    --background-color: #F8F9FA; /* —„«œÌ ›« Õ ··Œ·›Ì… */
+    --text-color: #333333; /* ·Ê‰ «·‰’ */
+}
+
+/* 2. «·≈⁄œ«œ«  «·√”«”Ì… («·ﬂÊœ «·√’·Ì „⁄ ≈÷«›… «·√·Ê«‰) */
 html {
-  font-size: 14px;
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+    html {
+        font-size: 16px;
+    }
 }
 
 body {
-  margin-bottom: 60px;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    margin-bottom: 60px;
+}
+
+/* 3.  Œ’Ì’ «· —ﬂÌ“ (Focus) ⁄·Ï «·⁄‰«’— («·√“—«—° ÕﬁÊ· «·≈œŒ«·) */
+/* ‰€Ì— ·Ê‰ Ÿ· «·’‰œÊﬁ (box-shadow) ·Ì” Œœ„ ·Ê‰ «· „ÌÌ“ */
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    /*  €ÌÌ— #258cfb ≈·Ï ·Ê‰ «· „ÌÌ“ («· —ﬂÊ«“) */
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem var(--accent-color);
+    border-color: var(--accent-color); /* · ·ÊÌ‰ ≈ÿ«— «·≈œŒ«· */
+}
+
+/* 4.  Œ’Ì’ ‘—Ìÿ «· ‰ﬁ· (Navbar) Ê«· –ÌÌ· (Footer) */
+.navbar {
+    background-color: white !important;
+    border-bottom: 3px solid var(--primary-color) !important;
+}
+
+    .navbar .navbar-brand {
+        color: var(--primary-color) !important;
+        font-weight: bold;
+        font-size: 1.5rem;
+    }
+
+    .navbar .nav-link {
+        color: var(--text-color) !important;
+        transition: color 0.3s;
+    }
+
+        .navbar .nav-link:hover {
+            color: var(--accent-color) !important;
+        }
+
+.footer {
+    border-top: 1px solid #ddd;
+    background-color: white;
+    color: var(--text-color);
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 60px;
+    line-height: 60px;
+}
+
+/* 5.  Œ’Ì’ «·√“—«— Ê«·⁄‰«’— (Primary/Success) */
+.btn-primary, .btn-success {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+    .btn-primary:hover, .btn-success:hover {
+        background-color: #6A1A9A !important; /* ·Ê‰ √€„ﬁ ⁄‰œ «· „—Ì— */
+        border-color: #6A1A9A !important;
+    }
+
+.card-header {
+    background-color: var(--primary-color) !important;
+    color: white !important;
 }

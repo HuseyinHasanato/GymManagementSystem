@@ -1,51 +1,51 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.AspNetCore.Identity; // مطلوب للربط بجدول AspNetUsers
+using Microsoft.AspNetCore.Identity; // AspNetUsers tablosuyla bağlantı için gerekli
 
 namespace GymManagementSystem.Models
 {
     public class Appointment
     {
-        // المفتاح الأساسي للموعد
+        // Randevunun birincil anahtarı
         public int AppointmentId { get; set; }
 
-        // ******* الربط بالمستخدم (العضو الذي حجز الموعد) *******
-        // المفتاح الأجنبي للمستخدم (العضو) - يجب أن يكون string لأنه يتطابق مع Id في IdentityUser
+        // ******* Kullanıcıya Bağlantı (Randevuyu Alan Üye) *******
+        // Kullanıcının (Üyenin) yabancı anahtarı - IdentityUser'daki Id ile eşleştiği için string olmalıdır
         public string MemberId { get; set; }
 
-        // خاصية التنقل للمستخدم (IdentityUser)
+        // Kullanıcının (IdentityUser) navigasyon özelliği
         [ForeignKey("MemberId")]
-        [Display(Name = "العضو الحاجز")]
+        [Display(Name = "Randevu Alan Üye")]
         public virtual IdentityUser Member { get; set; }
         // *******************************************************
 
-        // ******* الربط بالفئة/الخدمة (GroupClass) *******
+        // ******* Sınıf/Hizmet Bağlantısı (GroupClass) *******
         [Required]
-        [Display(Name = "الفئة/الخدمة المحجوزة")]
-        // هذا الربط يضمن أن الحجز متعلق بنوع خدمة معينة (Fitness, Yoga) 
+        [Display(Name = "Rezerve Edilen Sınıf/Hizmet")]
+        // Bu bağlantı, rezervasyonun belirli bir hizmet türüyle (Fitness, Yoga) ilgili olmasını sağlar
         public int GroupClassId { get; set; }
 
-        // خاصية التنقل للفئة
+        // Sınıfın navigasyon özelliği
         [ForeignKey("GroupClassId")]
         public virtual GroupClass Class { get; set; }
         // *************************************************
 
-        // تاريخ ووقت بدء الموعد - مطلوب لتطبيق منطق "التحقق من التوفر" 
-        [Required(ErrorMessage = "تاريخ ووقت البدء مطلوب.")]
-        [Display(Name = "تاريخ ووقت البدء")]
+        // Randevunun başlangıç tarihi ve saati - "Müsaitlik Kontrolü" mantığı için zorunlu
+        [Required(ErrorMessage = "Başlangıç tarihi ve saati zorunludur.")]
+        [Display(Name = "Başlangıç Tarihi ve Saati")]
         public DateTime StartTime { get; set; }
 
-        // تاريخ ووقت انتهاء الموعد (يتم حسابه بناءً على مدة الفئة/الخدمة)
-        [Required(ErrorMessage = "وقت الانتهاء مطلوب.")]
-        [Display(Name = "وقت الانتهاء")]
+        // Randevunun bitiş tarihi ve saati (Sınıfın/Hizmetin süresine göre hesaplanır)
+        [Required(ErrorMessage = "Bitiş zamanı zorunludur.")]
+        [Display(Name = "Bitiş Zamanı")]
         public DateTime EndTime { get; set; }
 
-        // حالة الموعد - مطلوب لتحقيق "آلية الموافقة على المواعيد" 
-        [Display(Name = "تم التأكيد؟")]
-        public bool IsConfirmed { get; set; } = false; // القيمة الافتراضية: بانتظار التأكيد
+        // Randevu durumu - "Randevu Onay Mekanizması" için zorunlu
+        [Display(Name = "Onaylandı Mı?")]
+        public bool IsConfirmed { get; set; } = false; // Varsayılan değer: Onay bekliyor
 
-        [Display(Name = "ملاحظات العضو")]
+        [Display(Name = "Üye Notları")]
         public string Notes { get; set; }
     }
 }

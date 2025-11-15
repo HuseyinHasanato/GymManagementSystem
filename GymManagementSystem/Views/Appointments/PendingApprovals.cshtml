@@ -1,0 +1,61 @@
+﻿@model IEnumerable<GymManagementSystem.Models.Appointment>
+@{
+    ViewData["Title"] = "Onay Bekleyen Randevular";
+}
+
+<h2 class="text-center mb-4">🔔 Onay Bekleyen Randevu Talepleri</h2>
+<p class="text-center text-muted">Aşağıdaki randevular, üyeler tarafından yeni alınmıştır ve onayınızı beklemektedir.</p>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info text-center mt-5">
+        Şu anda onay bekleyen yeni randevu talebi bulunmamaktadır.
+    </div>
+}
+else
+{
+    <table class="table table-striped table-hover mt-4">
+        <thead class="bg-primary text-white">
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.Member)</th>
+                <th>@Html.DisplayNameFor(model => model.Class)</th>
+                <th>@Html.DisplayNameFor(model => model.StartTime)</th>
+                <th>@Html.DisplayNameFor(model => model.EndTime)</th>
+                <th>@Html.DisplayNameFor(model => model.Notes)</th>
+                <th>İşlem</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr class="table-light">
+                    <td>@((item.Member != null ? item.Member.Email : "Bilinmiyor"))</td>
+                    <td>@(item.Class?.Name ?? "Bilinmiyor")</td>
+                    <td>@item.StartTime.ToString("dd MMM yyyy HH:mm")</td>
+                    <td>@item.EndTime.ToString("HH:mm")</td>
+                    <td>@(string.IsNullOrEmpty(item.Notes) ? "Not Yok" : item.Notes)</td>
+                    <td>
+                        @* Buton 1: Onayla (Approve) *@
+                        <form asp-action="Approve" asp-route-id="@item.AppointmentId" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-success" title="Randevuyu Onayla">
+                                <i class="fas fa-check"></i> Onayla
+                            </button>
+                        </form>
+
+                        @* Buton 2: Reddet (Reject/Delete) *@
+                        <form asp-action="Reject" asp-route-id="@item.AppointmentId" method="post" class="d-inline" onsubmit="return confirm('Bu randevuyu reddetmek istediğinizden emin misiniz?');">
+                            <button type="submit" class="btn btn-sm btn-danger" title="Randevuyu Reddet/İptal Et">
+                                <i class="fas fa-times"></i> Reddet
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

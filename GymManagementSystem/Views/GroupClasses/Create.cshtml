@@ -4,46 +4,58 @@
     ViewData["Title"] = "Yeni Grup Dersi Ekle";
 }
 
-<h1>Yeni Grup Dersi Ekle</h1>
+<h2 class="text-center mb-4">🆕 Yeni Grup Dersi Oluştur</h2>
 
 <hr />
-<div class="row">
-    <div class="col-md-4">
+<div class="row justify-content-center">
+    <div class="col-md-6">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="Name" class="control-label"></label>
                 <input asp-for="Name" class="form-control" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
 
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="Description" class="control-label"></label>
-                <textarea asp-for="Description" class="form-control"></textarea>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
 
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="StartTime" class="control-label"></label>
-                <input asp-for="StartTime" class="form-control" />
+                {{-- StartTime genellikle hem tarih hem saat seçimi için datetime-local tipinde olmalıdır --}}
+                <input asp-for="StartTime" type="datetime-local" class="form-control" />
                 <span asp-validation-for="StartTime" class="text-danger"></span>
             </div>
 
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="MaxCapacity" class="control-label"></label>
                 <input asp-for="MaxCapacity" class="form-control" />
                 <span asp-validation-for="MaxCapacity" class="text-danger"></span>
             </div>
 
-            <div class="form-group">
-                <label asp-for="TrainerId" class="control-label"></label>
-                <select asp-for="TrainerId" class="form-control" asp-items="ViewBag.TrainerId"></select> @* هذا يسحب المدربين من ViewData *@
+            {{-- EKLEME: DurationMinutes (Süre) alanını ekliyoruz --}}
+            <div class="form-group mb-3">
+                <label asp-for="DurationMinutes" class="control-label"></label>
+                <input asp-for="DurationMinutes" class="form-control" />
+                <span asp-validation-for="DurationMinutes" class="text-danger"></span>
+                <small class="form-text text-muted">Ders süresini dakika cinsinden (Örn: 60, 90) girin.</small>
             </div>
 
-            <div class="form-group mt-3">
-                <input type="submit" value="Oluştur" class="btn btn-primary" />
-                <a asp-action="Index" class="btn btn-secondary">Listeye Geri Dön</a>
+            <div class="form-group mb-4">
+                <label asp-for="TrainerId" class="control-label"></label>
+                {{-- TrainerId, GroupClassesController'da oluşturulan SelectList'ten (ViewBag.TrainerId) doldurulur --}}
+                <select asp-for="TrainerId" class="form-control" asp-items="ViewBag.TrainerId">
+                    <option value="">-- Lütfen bir eğitmen seçin --</option>
+                </select>
+            </div>
+
+            <div class="form-group mt-4 text-center">
+                <input type="submit" value="Ders Oluştur" class="btn btn-primary btn-lg w-50" />
+                <a asp-action="Index" class="btn btn-secondary mt-2 w-50">Listeye Geri Dön</a>
             </div>
         </form>
     </div>

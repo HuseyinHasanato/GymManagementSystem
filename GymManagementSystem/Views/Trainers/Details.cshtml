@@ -4,32 +4,52 @@
     ViewData["Title"] = "Eğitmen Detayları";
 }
 
-<h1>Eğitmen Detayları</h1>
+<h2 class="text-center mb-5">🔍 Eğitmen Detayları: @Model.FullName</h2>
 
-<div>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.FullName)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.FullName)
-        </dd>
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Specialty)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Specialty)
-        </dd>
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.ImageUrl)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.ImageUrl)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning">Düzenle</a> |
-    <a asp-action="Index" class="btn btn-secondary">Listeye Geri Dön</a>
+<div class="card shadow-lg mx-auto" style="max-width: 600px;">
+
+    <div class="card-header bg-primary text-white text-center">
+        <h4>Eğitmen Kimlik Kartı</h4>
+    </div>
+
+    <div class="card-body">
+        <div class="text-center mb-4">
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <img src="@Model.ImageUrl" alt="@Model.FullName Resmi" class="img-thumbnail" style="width: 150px; height: 150px; object-fit: cover; border-radius: 50%; border: 3px solid #00CED1;" />
+            }
+            else
+            {
+                <div class="text-muted border p-3 rounded">Fotoğraf Bulunmamaktadır</div>
+            }
+        </div>
+
+        <dl class="row mt-4">
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.FullName):
+            </dt>
+            <dd class="col-sm-8 font-weight-bold">
+                @Html.DisplayFor(model => model.FullName)
+            </dd>
+
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.Specialty):
+            </dt>
+            <dd class="col-sm-8">
+                <span class="badge bg-info text-dark p-2">@Html.DisplayFor(model => model.Specialty)</span>
+            </dd>
+
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.ImageUrl):
+            </dt>
+            <dd class="col-sm-8 text-truncate">
+                @Html.DisplayFor(model => model.ImageUrl)
+            </dd>
+        </dl>
+    </div>
+
+    <div class="card-footer text-center">
+        <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning"><i class="fas fa-edit"></i> Düzenle</a>
+        <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Listeye Geri Dön</a>
+    </div>
 </div>

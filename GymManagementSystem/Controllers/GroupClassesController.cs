@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Linq;
 
 
+// Sadece Yönetici rolüne sahip kullanıcılar CRUD işlemlerini yapabilir
 [Authorize(Roles = "Admin")]
 public class GroupClassesController : Controller
 {
@@ -17,16 +18,17 @@ public class GroupClassesController : Controller
         _context = context;
     }
 
-    
+    // GET: /GroupClasses/Index (Ders Listeleme)
+    // [AllowAnonymous] olduğundan, giriş yapmamış herkes dersleri görebilir (hizmet kataloğu)
     [AllowAnonymous]
     public async Task<IActionResult> Index()
     {
-        
+        // Eğitmen (Trainer) bilgisini dahil ederek tüm dersleri asenkron olarak getirir
         var applicationDbContext = _context.GroupClasses.Include(g => g.Trainer);
         return View(await applicationDbContext.ToListAsync());
     }
 
-    
+    // GET: /GroupClasses/Details/{id} (Ders Detayları)
     [AllowAnonymous]
     public async Task<IActionResult> Details(int? id)
     {
@@ -36,55 +38,62 @@ public class GroupClassesController : Controller
         }
 
         var groupClass = await _context.GroupClasses
-            .Include(g => g.Trainer)
+            .Include(g => g.Trainer) // Eğitmen detaylarını getir
             .FirstOrDefaultAsync(m => m.GroupClassId == id);
 
         if (groupClass == null)
         {
-            return NotFound();
+            return NotFound(); // Ders bulunamadı hatası
         }
 
         return View(groupClass);
     }
 
-    
+    // GET: /GroupClasses/Create (Yeni Ders Oluşturma Formu)
+    // Sadece Adminler erişebilir (Kontrolcü seviyesinde yetkilendirme var)
     public IActionResult Create()
     {
-      
+        // Eğitmen seçimi için SelectList oluşturma
         ViewData["TrainerId"] = new SelectList(_context.Trainers, "Id", "FullName");
         return View();
     }
 
+    // POST: /GroupClasses/Create (Yeni Dersi Kaydet)
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("GroupClassId,Name,Description,StartTime,MaxCapacity,TrainerId")] GroupClass groupClass)
+    public async Task<IActionResult> Create([Bind("GroupClassId,Name,Description,StartTime,MaxCapacity,TrainerId,DurationMinutes")] GroupClass groupClass)
     {
-        
+        // Modelin geçerli olup olmadığını ve DurationMinutes'ın dahil edildiğini kontrol et
         if (ModelState.IsValid)
         {
             _context.Add(groupClass);
             await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Yeni ders/hizmet başarıyla sisteme eklendi.";
             return RedirectToAction(nameof(Index));
         }
+
+        // Hata durumunda formu yeniden göster ve Eğitmen listesini tekrar doldur
         ViewData["TrainerId"] = new SelectList(_context.Trainers, "Id", "FullName", groupClass.TrainerId);
         return View(groupClass);
     }
 
-   
+    // GET: /GroupClasses/Edit/{id} (Ders Düzenleme Formu)
     public async Task<IActionResult> Edit(int? id)
     {
         if (id == null) return NotFound();
+
         var groupClass = await _context.GroupClasses.FindAsync(id);
+
         if (groupClass == null) return NotFound();
 
         ViewData["TrainerId"] = new SelectList(_context.Trainers, "Id", "FullName", groupClass.TrainerId);
         return View(groupClass);
     }
 
-   
+    // POST: /GroupClasses/Edit/{id} (Ders Bilgilerini Güncelle)
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("GroupClassId,Name,Description,StartTime,MaxCapacity,TrainerId")] GroupClass groupClass)
+    public async Task<IActionResult> Edit(int id, [Bind("GroupClassId,Name,Description,StartTime,MaxCapacity,TrainerId,DurationMinutes")] GroupClass groupClass)
     {
         if (id != groupClass.GroupClassId) return NotFound();
 
@@ -94,6 +103,7 @@ public class GroupClassesController : Controller
             {
                 _context.Update(groupClass);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Ders bilgileri başarıyla güncellendi.";
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -103,28 +113,30 @@ public class GroupClassesController : Controller
                 }
                 else
                 {
-                    throw;
+                    throw; // Eşzamanlılık hatası
                 }
             }
             return RedirectToAction(nameof(Index));
         }
+
         ViewData["TrainerId"] = new SelectList(_context.Trainers, "Id", "FullName", groupClass.TrainerId);
         return View(groupClass);
     }
 
-   
+    // GET: /GroupClasses/Delete/{id} (Silme Onay Formu)
     public async Task<IActionResult> Delete(int? id)
     {
         if (id == null) return NotFound();
+
         var groupClass = await _context.GroupClasses
-            .Include(g => g.Trainer) 
+            .Include(g => g.Trainer) // Eğitmen adını göstermek için dahil et
             .FirstOrDefaultAsync(m => m.GroupClassId == id);
 
         if (groupClass == null) return NotFound();
         return View(groupClass);
     }
 
-    
+    // POST: /GroupClasses/Delete/{id} (Silme İşlemini Onayla)
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
@@ -136,6 +148,7 @@ public class GroupClassesController : Controller
         }
 
         await _context.SaveChangesAsync();
+        TempData["SuccessMessage"] = "Ders başarıyla silindi.";
         return RedirectToAction(nameof(Index));
     }
 }

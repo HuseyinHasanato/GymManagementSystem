@@ -2,50 +2,50 @@ using GymManagementSystem.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using GymManagementSystem.Data.Initializer;
-using GymManagementSystem.Services; // ÇÓÊíÑÇÏ ÇáÎÏãÇÊ (áÜ IAIService)
-// Êã ÍĞİ: using OpenAI.Interfaces; 
-// Êã ÍĞİ: using OpenAI; 
+using GymManagementSystem.Services; // IAIService iÃ§in servisler
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Hizmetleri kapsayÄ±cÄ±ya ekle.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-// 2. ÅÚÏÇÏÇÊ ÇáåæíÉ (Identity) ÇáäåÇÆíÉ
+// 2. Kimlik (Identity) Servislerini YapÄ±landÄ±rma
 builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 {
-    options.SignIn.RequireConfirmedAccount = false;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequiredLength = 6;
-    options.Password.RequireDigit = true;
-    options.Password.RequireUppercase = true;
+    // Ã–NEMLÄ°: YÃ¶netici ÅŸifresi 'SAU' iÃ§in gerekli ayarlar
+    options.SignIn.RequireConfirmedAccount = false; // E-posta onayÄ± gerekliliÄŸini kapat (Ã–nceki istek Ã¼zerine)
 
+    // Åifre Gereksinimleri (KullanÄ±cÄ± isteÄŸi olan 'SAU' ÅŸifresi iÃ§in ayarlandÄ±)
+    options.Password.RequireLowercase = false;          // KÃ¼Ã§Ã¼k harf zorunluluÄŸunu kapat
+    options.Password.RequireUppercase = true;           // BÃ¼yÃ¼k harf zorunluluÄŸunu aÃ§Ä±k tut (SAU iÃ§eriyor)
+    options.Password.RequireDigit = false;              // Rakam zorunluluÄŸunu kapat
+    options.Password.RequiredLength = 3;                // En az 3 karakter uzunluÄŸu ayarla (SAU iÃ§in)
+    options.Password.RequireNonAlphanumeric = false;    // Sembol zorunluluÄŸunu kapat
 })
-.AddRoles<IdentityRole>() // ÖÑæÑí áÇÓÊÎÏÇã RoleManager æÏÚã ÇáÃÏæÇÑ
+.AddRoles<IdentityRole>() // RoleManager servisini ekler (Rolleri yÃ¶netmek iÃ§in)
 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-// ********** ÅÖÇİÉ ÎÏãÇÊ ÇáĞßÇÁ ÇáÇÕØäÇÚí (AI Integration) **********
+// ********** Yapay Zeka (AI) Entegrasyonu **********
 
-// 3. äŞæã İŞØ ÈÅÖÇİÉ ÎÏãÉ HttpClient áÏÚã ÇáÇÊÕÇá ÇáãÈÇÔÑ ãä AIService
+// 3. AIService'in IHttpClientFactory Ã¼zerinden HTTP istekleri yapabilmesi iÃ§in HttpClient servisini ekle
 builder.Services.AddHttpClient();
 
-// 4. ÊÓÌíá ÎÏãÊäÇ ÇáãÎÕÕÉ ááÜ AI (áÊãßíä ÍŞä ÇáÊÈÚíÉ İí æÍÏÉ ÇáÊÍßã)
-// åĞå ÇáÎÏãÉ ÊÚÊãÏ ÇáÂä Úáì HttpClient æ IConfiguration
+// 4. Yapay Zeka Servisini kaydet (IAIService arayÃ¼zÃ¼nÃ¼ AIService sÄ±nÄ±fÄ±na baÄŸlar)
 builder.Services.AddScoped<IAIService, AIService>();
 
-// ********************************************************************
+// **************************************************
 
-// ÊÓÌíá ÎÏãÉ DbInitializer ááÇÓÊÎÏÇã ÚÈÑ Dependency Injection
+// DbInitializer servisini (Seed Data) Dependency Injection'a ekle
 builder.Services.AddScoped<DbInitializer>();
 
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// ÊåíÆÉ ŞÇÚÏÉ ÇáÈíÇäÇÊ ÚäÏ ÇáÊÔÛíá (Seed Data)
+// VeritabanÄ± baÅŸlatma ve Roller/KullanÄ±cÄ±lar oluÅŸturma iÅŸlemini Ã§aÄŸÄ±r
 await InitializeDatabase(app);
 
 
@@ -76,11 +76,64 @@ app.MapRazorPages();
 app.Run();
 
 
+// *******************************************************************
+// VERÄ°TABANI BAÅLATMA VE ROL/ADMÄ°N KULLANICI OLUÅTURMA MANTIÄI
+// *******************************************************************
 async Task InitializeDatabase(IHost host)
 {
     using (var scope = host.Services.CreateScope())
     {
-        var initializer = scope.ServiceProvider.GetRequiredService<DbInitializer>();
+        var services = scope.ServiceProvider;
+        var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+        var initializer = services.GetRequiredService<DbInitializer>();
+
+        // 1. DbInitializer'Ä± Ã‡alÄ±ÅŸtÄ±r (Gerekli tÃ¼m rolleri ve initial data'yÄ± oluÅŸturur)
         await initializer.Initialize();
+
+        // 2. YÃ–NETÄ°CÄ° HESABINI GÃœNCELLE/OLUÅTUR (Ã–nceki istek Ã¼zerine)
+        var adminEmail = "huseyin.hasanato@ogr.sakarya.edu.tr";
+        var adminPassword = "SAU"; // KullanÄ±cÄ±nÄ±n talep ettiÄŸi ÅŸifre
+
+        var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+        if (adminUser == null)
+        {
+            // KullanÄ±cÄ± yoksa oluÅŸtur
+            adminUser = new IdentityUser
+            {
+                UserName = adminEmail,
+                Email = adminEmail,
+                EmailConfirmed = true
+            };
+
+            var result = await userManager.CreateAsync(adminUser, adminPassword);
+
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(adminUser, "Admin");
+                Console.WriteLine($"Admin hesabÄ± oluÅŸturuldu ve rol atandÄ±: {adminEmail}");
+            }
+        }
+        else
+        {
+            // KullanÄ±cÄ± varsa bilgileri gÃ¼ncelle (Ã–zellikle ÅŸifreyi gÃ¼ncelle)
+            await userManager.SetEmailAsync(adminUser, adminEmail);
+            await userManager.SetUserNameAsync(adminUser, adminEmail);
+
+            var token = await userManager.GeneratePasswordResetTokenAsync(adminUser);
+            var resetResult = await userManager.ResetPasswordAsync(adminUser, token, adminPassword);
+
+            if (resetResult.Succeeded)
+            {
+                Console.WriteLine($"Admin hesabÄ±nÄ±n bilgileri baÅŸarÄ±yla gÃ¼ncellendi: {adminEmail}");
+            }
+
+            // RolÃ¼n atanmÄ±ÅŸ olduÄŸundan emin ol
+            if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
+            {
+                await userManager.AddToRoleAsync(adminUser, "Admin");
+            }
+        }
     }
 }

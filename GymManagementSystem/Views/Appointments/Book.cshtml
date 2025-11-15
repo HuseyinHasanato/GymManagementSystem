@@ -1,0 +1,55 @@
+﻿@model GymManagementSystem.Models.Appointment
+@{
+    ViewData["Title"] = "Randevu Al";
+}
+
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <h2 class="text-center mb-4">🗓️ Yeni Randevu Oluştur</h2>
+        <p class="text-muted text-center">Lütfen almak istediğiniz dersi ve başlangıç zamanını seçiniz.</p>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+        }
+
+        <form asp-action="Book" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            @* Alan: Grup Dersini Seçme *@
+            <div class="form-group mb-3">
+                <label asp-for="GroupClassId" class="control-label">Ders / Hizmet Seçin</label>
+                <select asp-for="GroupClassId" class="form-control" asp-items="ViewBag.GroupClassId">
+                    <option value="">-- Lütfen bir ders seçiniz --</option>
+                </select>
+                <span asp-validation-for="GroupClassId" class="text-danger"></span>
+            </div>
+
+            @* Alan: Başlangıç Zamanı Seçme *@
+            <div class="form-group mb-4">
+                <label asp-for="StartTime" class="control-label">Başlangıç Tarihi ve Saati</label>
+                <input asp-for="StartTime" type="datetime-local" class="form-control" />
+                <span asp-validation-for="StartTime" class="text-danger"></span>
+                <small class="form-text text-muted">Randevunuz seçtiğiniz ders süresine göre otomatik olarak sona erecektir.</small>
+            </div>
+
+            @* Alan: Üye Notları (Opsiyonel) *@
+            <div class="form-group mb-4">
+                <label asp-for="Notes" class="control-label">Üye Notları (Opsiyonel)</label>
+                <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Notes" class="text-danger"></span>
+            </div>
+
+            <div class="form-group text-center">
+                <button type="submit" class="btn btn-primary btn-lg w-75">Randevuyu Kaydet</button>
+                <a asp-action="MyAppointments" class="btn btn-outline-secondary mt-3">Randevularıma Geri Dön</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

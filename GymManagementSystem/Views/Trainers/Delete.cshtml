@@ -1,38 +1,48 @@
 ﻿@model GymManagementSystem.Models.Trainer
 
 @{
-    ViewData["Title"] = "Eğitmen Sil";
+    ViewData["Title"] = "Eğitmen Silme Onayı";
 }
 
-<h1>Eğitmen Sil</h1>
+<h2 class="text-center mb-4 text-danger">⚠️ Eğitmen Silme İşlemi</h2>
 
-<h3>Bu eğitmeni silmek istediğinizden emin misiniz?</h3>
-<div>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.FullName)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.FullName)
-        </dd>
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Specialty)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Specialty)
-        </dd>
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.ImageUrl)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.ImageUrl)
-        </dd>
-    </dl>
+<div class="alert alert-danger text-center shadow-sm mx-auto" style="max-width: 600px;">
+    <h4>**@Model.FullName** adlı eğitmeni silmek istediğinizden **EMİN MİSİNİZ**?</h4>
+    <p>Bu işlem **geri alınamaz** ve eğitmenin randevu kayıtları etkilenebilir.</p>
+</div>
 
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="Id" />
-        <input type="submit" value="Sil (Onayla)" class="btn btn-danger" />
-        <a asp-action="Index" class="btn btn-secondary">Listeye Geri Dön</a>
-    </form>
+<div class="card shadow-lg mx-auto mt-4" style="max-width: 600px;">
+    <div class="card-body">
+
+        <div class="text-center mb-4">
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <img src="@Model.ImageUrl" alt="@Model.FullName Resmi" class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%;" />
+            }
+        </div>
+
+        <dl class="row">
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.FullName)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.FullName)
+            </dd>
+
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.Specialty)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.Specialty)
+            </dd>
+        </dl>
+    </div>
+
+    <div class="card-footer text-center">
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="Id" />
+            <input type="submit" value="Silme İşlemini ONAYLA" class="btn btn-danger btn-lg" />
+            <a asp-action="Index" class="btn btn-secondary mt-2">Listeye Geri Dön</a>
+        </form>
+    </div>
 </div>

@@ -1,50 +1,70 @@
 ﻿@model GymManagementSystem.Models.GroupClass
 
 @{
-    ViewData["Title"] = "Ders Sil";
+    ViewData["Title"] = "Ders Silme Onayı";
 }
 
-<h1>Ders Sil</h1>
+<h2 class="text-center mb-4 text-danger">⚠️ Ders Silme İşlemi</h2>
 
-<h3>Bu dersi silmek istediğinizden emin misiniz?</h3>
-<div>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.StartTime)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.StartTime)
-        </dd>
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.MaxCapacity)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.MaxCapacity)
-        </dd>
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Trainer)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Trainer!.FullName)
-        </dd>
-    </dl>
+<div class="alert alert-danger text-center shadow-sm mx-auto" style="max-width: 700px;">
+    <h4>**@Model.Name** adlı dersi silmek istediğinizden **EMİN MİSİNİZ**?</h4>
+    <p>Bu işlem **geri alınamaz** ve bu derse ait tüm randevular/kayıtlar etkilenecektir.</p>
+</div>
 
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="GroupClassId" />
-        <input type="submit" value="Sil (Onayla)" class="btn btn-danger" />
-        <a asp-action="Index" class="btn btn-secondary">Listeye Geri Dön</a>
-    </form>
+<div class="card shadow-lg mx-auto mt-4" style="max-width: 700px;">
+    <div class="card-body">
+
+        <dl class="row">
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.Name):
+            </dt>
+            <dd class="col-sm-8 font-weight-bold">
+                @Html.DisplayFor(model => model.Name)
+            </dd>
+
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.Description):
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.Description)
+            </dd>
+
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.StartTime):
+            </dt>
+            <dd class="col-sm-8">
+                @Model.StartTime.ToString("dd MMM yyyy, HH:mm")
+            </dd>
+
+            {{-- EKLEME: DurationMinutes (Süre) alanını ekliyoruz --}}
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.DurationMinutes):
+            </dt>
+            <dd class="col-sm-8">
+                @Model.DurationMinutes dakika
+            </dd>
+
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.MaxCapacity):
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.MaxCapacity) Kişi
+            </dd>
+
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.Trainer):
+            </dt>
+            <dd class="col-sm-8">
+                <span class="badge bg-info text-dark">@Html.DisplayFor(model => model.Trainer!.FullName)</span>
+            </dd>
+        </dl>
+    </div>
+
+    <div class="card-footer text-center">
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="GroupClassId" />
+            <input type="submit" value="Silme İşlemini ONAYLA" class="btn btn-danger btn-lg" />
+            <a asp-action="Index" class="btn btn-secondary mt-2">Listeye Geri Dön</a>
+        </form>
+    </div>
 </div>

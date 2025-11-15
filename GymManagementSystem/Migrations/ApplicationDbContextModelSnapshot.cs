@@ -90,6 +90,9 @@ namespace GymManagementSystem.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("DurationMinutes")
+                        .HasColumnType("int");
+
                     b.Property<int>("MaxCapacity")
                         .HasColumnType("int");
 
@@ -158,7 +161,7 @@ namespace GymManagementSystem.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<decimal>("WeightKg")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.HasKey("Id");
 

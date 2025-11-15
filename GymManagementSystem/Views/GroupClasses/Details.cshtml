@@ -4,47 +4,63 @@
     ViewData["Title"] = "Ders Detayları";
 }
 
-<h1>Ders Detayları</h1>
+<h2 class="text-center mb-5">⭐ Ders Detayları: @Model.Name</h2>
 
-<div>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.StartTime)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.StartTime)
-        </dd>
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.MaxCapacity)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.MaxCapacity)
-        </dd>
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Trainer)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Trainer!.FullName)
-        </dd>
-    </dl>
-</div>
-<div>
-    @if (User.IsInRole("Admin"))
-    {
-        <a asp-action="Edit" asp-route-id="@Model?.GroupClassId" class="btn btn-warning">Düzenle</a>
-    }
-    <a asp-action="Index" class="btn btn-secondary">Listeye Geri Dön</a>
+<div class="card shadow-lg mx-auto" style="max-width: 800px;">
+
+    <div class="card-header bg-dark text-white text-center">
+        <h4>@Model.Name Bilgileri</h4>
+    </div>
+
+    <div class="card-body">
+
+        <dl class="row mt-3">
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.Description):
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.Description)
+            </dd>
+
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.Trainer):
+            </dt>
+            <dd class="col-sm-8 font-weight-bold">
+                <span class="badge bg-info text-dark p-2">@Html.DisplayFor(model => model.Trainer!.FullName)</span>
+            </dd>
+
+            <dt class="col-sm-4 text-primary">
+                @Html.DisplayNameFor(model => model.StartTime):
+            </dt>
+            <dd class="col-sm-8 text-primary font-weight-bold">
+                @Model.StartTime.ToString("dd MMM yyyy, HH:mm")
+            </dd>
+
+            <dt class="col-sm-4 text-success">
+                @Html.DisplayNameFor(model => model.DurationMinutes):
+            </dt>
+            <dd class="col-sm-8 text-success font-weight-bold">
+                @Model.DurationMinutes dakika
+            </dd>
+
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.MaxCapacity):
+            </dt>
+            <dd class="col-sm-8">
+                <span class="badge bg-secondary p-2">@Html.DisplayFor(model => model.MaxCapacity) Kişi</span>
+            </dd>
+
+            @* Eğer GroupClass modelinizde dersin kaç kez rezerve edildiğini sayan bir özellik olsaydı burada gösterebilirdik. *@
+
+        </dl>
+    </div>
+
+    <div class="card-footer text-center">
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="Edit" asp-route-id="@Model?.GroupClassId" class="btn btn-warning"><i class="fas fa-edit"></i> Düzenle</a>
+            <a asp-action="Delete" asp-route-id="@Model?.GroupClassId" class="btn btn-danger"><i class="fas fa-trash"></i> Sil</a>
+        }
+        <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Listeye Geri Dön</a>
+    </div>
 </div>

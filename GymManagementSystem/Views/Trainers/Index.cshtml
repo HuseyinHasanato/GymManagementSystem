@@ -1,43 +1,60 @@
 ﻿@model IEnumerable<GymManagementSystem.Models.Trainer>
-
 @{
     ViewData["Title"] = "Eğitmen Yönetimi";
 }
 
-<h1>Eğitmenler</h1>
+<h2 class="text-center mb-4">🏋️ Eğitmen Yönetimi</h2>
+<p class="text-center text-muted">Sisteme kayıtlı tüm eğitmenlerin listesi.</p>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Yeni Eğitmen Ekle</a>
-</p>
+<div class="mb-3">
+    <a asp-action="Create" class="btn btn-primary"><i class="fas fa-user-plus"></i> Yeni Eğitmen Ekle</a>
+</div>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.FullName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Specialty)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+@if (!Model.Any())
+{
+    <div class="alert alert-warning text-center mt-5">
+        Sisteme kayıtlı eğitmen bulunmamaktadır. Lütfen bir eğitmen ekleyin.
+    </div>
+}
+else
+{
+    <table class="table table-striped table-hover mt-4">
+        <thead class="bg-primary text-white">
             <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.FullName)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Specialty)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Düzenle</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Detaylar</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Sil</a>
-                </td>
+                <th>@Html.DisplayNameFor(model => model.FullName)</th>
+                <th>@Html.DisplayNameFor(model => model.Specialty)</th>
+                <th>@Html.DisplayNameFor(model => model.ImageUrl)</th>
+                <th>İşlemler</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.FullName)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Specialty)</td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(item.ImageUrl))
+                        {
+                            <img src="@item.ImageUrl" alt="@item.FullName Resmi" style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%;" />
+                        }
+                        else
+                        {
+                            <span>Fotoğraf Yok</span>
+                        }
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-info" title="Düzenle"><i class="fas fa-edit"></i></a> |
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-secondary" title="Detaylar"><i class="fas fa-info-circle"></i></a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger" title="Sil"><i class="fas fa-trash"></i></a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
