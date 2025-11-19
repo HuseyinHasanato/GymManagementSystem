@@ -26,7 +26,6 @@ namespace GymManagementSystem.Controllers
             _logger = logger;
         }
 
-        // 1. عرض صفحة إدخال البيانات (الطول، الوزن، الهدف)
         [HttpGet]
         public async Task<IActionResult> Profile()
         {
@@ -43,14 +42,12 @@ namespace GymManagementSystem.Controllers
             return View(profile);
         }
 
-        // 2. حفظ البيانات والانتقال لتوليد الخطة
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SaveProfile(UserProfile profile)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             profile.MemberId = userId;
-
             ModelState.Remove("Member");
 
             if (ModelState.IsValid)
@@ -73,53 +70,47 @@ namespace GymManagementSystem.Controllers
                     }
 
                     await _context.SaveChangesAsync();
-                    TempData["SuccessMessage"] = "Profiliniz güncellendi. Planınız hazırlanıyor...";
-
                     return RedirectToAction(nameof(GeneratePlan));
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Profil kaydetme hatası.");
-                    ModelState.AddModelError("", "Veritabanına kaydedilirken bir hata oluştu.");
+                    ModelState.AddModelError("", "Veritabanı Hatası: " + ex.Message);
                 }
             }
             return View("Profile", profile);
         }
 
-        // 3. الأكشن المسؤول عن استدعاء Gemini وعرض النتيجة
         [HttpGet]
         public async Task<IActionResult> GeneratePlan()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            // جلب البيانات بدون تتبع لتسريع الأداء
             var profile = await _context.UserProfiles.AsNoTracking().FirstOrDefaultAsync(p => p.MemberId == userId);
 
-            if (profile == null)
-            {
-                return RedirectToAction(nameof(Profile));
-            }
+            if (profile == null) return RedirectToAction(nameof(Profile));
 
             try
             {
-                _logger.LogInformation("Gemini AI Planı oluşturuluyor: {UserId}", userId);
+                // --- تعديل تشخيصي ---
+                _logger.LogInformation("AI isteği başlatılıyor...");
 
-                // استدعاء خدمة Gemini التي قمنا بإعدادها بمفتاح AIza...
+                // نقوم بطلب الخطة ونضعها مباشرة في ViewBag
                 var workoutPlan = await _aiService.GenerateWorkoutPlanAsync(profile);
 
                 if (string.IsNullOrEmpty(workoutPlan))
                 {
-                    ViewBag.WorkoutPlan = "⚠️ AI yanıt üretemedi. Lütfen API anahtarını kontrol edin.";
+                    ViewBag.WorkoutPlan = "⚠️ AI Boş Yanıt Döndürdü. Lütfen API Key'i ve interneti kontrol edin.";
                 }
                 else
                 {
-                    // تمرير النص (Markdown) إلى الصفحة
                     ViewBag.WorkoutPlan = workoutPlan;
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "AI Plan hatası.");
-                ViewBag.WorkoutPlan = $"❌ Hata: {ex.Message}";
+                _logger.LogError(ex, "AI Servis Hatası");
+                // هذا السطر سيظهر لك سبب المشكلة الحقيقي في المتصفح
+                ViewBag.WorkoutPlan = $"❌ Hata Detayı: {ex.Message}";
             }
 
             return View(profile);

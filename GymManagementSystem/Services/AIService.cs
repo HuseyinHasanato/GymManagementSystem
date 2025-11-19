@@ -14,28 +14,23 @@ namespace GymManagementSystem.Services
         public AIService(HttpClient httpClient, IConfiguration configuration)
         {
             _httpClient = httpClient;
-            // قراءة المفتاح من appsettings.json
+            // التأكد من جلب المفتاح من الإعدادات
             _apiKey = configuration["GeminiKey"] ?? "";
         }
 
         public async Task<string> GenerateWorkoutPlanAsync(UserProfile profile)
         {
             if (string.IsNullOrEmpty(_apiKey))
-                return "❌ Gemini API Key eksik! Lütfen appsettings.json dosyasını kontrol edin.";
+                return "❌ Gemini API Key eksik! appsettings.json dosyasını kontrol edin.";
 
-            // استخدام موديل Gemini 1.5 Flash (الأسرع والأفضل للمشاريع الطلابية)
+            // استخدام v1beta للوصول إلى أحدث النماذج
             string url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={_apiKey}";
 
-            // بناء الطلب (Prompt) بطريقة احترافية لضمان جودة الجدول
             var promptText = new StringBuilder();
-            promptText.AppendLine("Sen uzman bir fitness eğitmeni ve beslenme uzmanısın.");
-            promptText.AppendLine($"Kullanıcı Profili: Yaş {profile.Age}, Boy {profile.HeightCm}cm, Kilo {profile.WeightKg}kg.");
-            promptText.AppendLine($"Ana Hedef: {profile.FitnessGoal}.");
-            promptText.AppendLine("Lütfen aşağıdaki kriterlere göre profesyonel bir program hazırla:");
-            promptText.AppendLine("1. 5 günlük detaylı antrenman planı.");
-            promptText.AppendLine("2. Her gün için set ve tekrar sayıları.");
-            promptText.AppendLine("3. Hedefe uygun kısa beslenme tavsiyeleri.");
-            promptText.AppendLine("4. Yanıtı tamamen TÜRKÇE ve şık bir Markdown formatında ver.");
+            promptText.AppendLine("Sen profesyonel bir fitness antrenörü ve diyetisyensin.");
+            promptText.AppendLine($"Müşteri Bilgileri: Yaş: {profile.Age}, Boy: {profile.HeightCm}cm, Kilo: {profile.WeightKg}kg.");
+            promptText.AppendLine($"Hedef: {profile.FitnessGoal}.");
+            promptText.AppendLine("Lütfen 5 günlük detaylı antrenman programı ve 3 beslenme tavsiyesi içeren Türkçe bir yanıt ver. Markdown formatını kullan.");
 
             var requestBody = new
             {
@@ -45,40 +40,44 @@ namespace GymManagementSystem.Services
                             new { text = promptText.ToString() }
                         }
                     }
-                },
-                generationConfig = new
-                {
-                    temperature = 0.7, // توازن بين الإبداع والدقة
-                    maxOutputTokens = 2048
                 }
             };
 
             try
             {
+                // إرسال الطلب مع التحقق من الوقت
                 var response = await _httpClient.PostAsJsonAsync(url, requestBody);
+                var responseString = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var result = await response.Content.ReadFromJsonAsync<JsonElement>();
+                    using var doc = JsonDocument.Parse(responseString);
 
-                    // استخراج النص مع التحقق من وجود البيانات لتجنب الـ Null Reference
-                    if (result.TryGetProperty("candidates", out var candidates) && candidates.GetArrayLength() > 0)
+                    // محاولة استخراج النص بأمان
+                    if (doc.RootElement.TryGetProperty("candidates", out var candidates) && candidates.GetArrayLength() > 0)
                     {
-                        var content = candidates[0].GetProperty("content").GetProperty("parts")[0].GetProperty("text").GetString();
-                        return content ?? "Hata: İçerik oluşturulamadı.";
+                        var text = candidates[0]
+                            .GetProperty("content")
+                            .GetProperty("parts")[0]
+                            .GetProperty("text")
+                            .GetString();
+
+                        return text ?? "⚠️ AI yanıtı metin içermiyor.";
                     }
-                    return "❌ AI yanıt üretemedi, lütfen tekrar deneyin.";
+
+                    return "⚠️ AI yanıt yapısı beklenenden farklı.";
                 }
 
-                // معالجة رسائل الخطأ الشائعة
-                if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
-                    return "❌ Hata: Geçersiz istek veya API anahtarı hatası.";
-
-                return $"❌ AI Hatası: {response.StatusCode}";
+                // في حال وجود خطأ من سيرفر Google (مثل 400 أو 403 أو 429)
+                return $"❌ Google API Hatası ({response.StatusCode}): {responseString}";
+            }
+            catch (HttpRequestException httpEx)
+            {
+                return $"❌ Bağlantı Hatası: İnternet bağlantınızı veya API adresini kontrol edin. Detay: {httpEx.Message}";
             }
             catch (Exception ex)
             {
-                return $"❌ Sistem Hatası: {ex.Message}";
+                return $"❌ Beklenmedik Sistem Hatası: {ex.Message}";
             }
         }
     }

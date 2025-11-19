@@ -4,46 +4,34 @@
 }
 
 <div class="container mt-4 mb-5">
-    <div class="card shadow-lg border-0 overflow-hidden">
-        @* Header *@
-        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
             <h3 class="mb-0 h4"><i class="bi bi-cpu-fill text-info"></i> AI Antrenman Asistanı</h3>
-            <div class="no-print">
-                <a asp-controller="AI" asp-action="Profile" class="btn btn-outline-light btn-sm rounded-pill">
-                    <i class="bi bi-pencil-square"></i> Bilgileri Güncelle
-                </a>
-            </div>
         </div>
 
-        <div class="card-body p-4 bg-light">
+        <div class="card-body p-4">
             @if (ViewBag.WorkoutPlan != null)
             {
                 <div class="p-4 bg-white border rounded shadow-sm">
-                    <h5 class="text-primary border-bottom pb-2 mb-4">
-                        <i class="bi bi-clipboard-data"></i> Size Özel Hazırlanan Program
-                    </h5>
+                    <h5 class="text-primary border-bottom pb-2 mb-4">Size Özel Program</h5>
 
-                    @* عرض النص بتنسيق pre-wrap يضمن ظهور الأسطر والمسافات كما أرسلها الذكاء الاصطناعي *@
-                    <div class="ai-simple-content">
-                        @ViewBag.WorkoutPlan
+                    @* تعديل أساسي: تحويل النص القادم من AI ليدعم الأسطر الجديدة *@
+                    <div class="ai-content" style="white-space: pre-line; font-family: sans-serif; line-height: 1.6;">
+                        @Html.Raw(ViewBag.WorkoutPlan.ToString())
                     </div>
                 </div>
 
                 <div class="mt-4 text-center no-print">
-                    <button onclick="window.print()" class="btn btn-primary btn-lg px-5 shadow rounded-pill">
-                        <i class="bi bi-printer-fill"></i> Yazdır / PDF
-                    </button>
-                    <a asp-action="Profile" class="btn btn-outline-secondary ms-2 rounded-pill">
-                        <i class="bi bi-arrow-clockwise"></i> Yeniden Oluştur
-                    </a>
+                    <button onclick="window.print()" class="btn btn-primary rounded-pill">Yazdır / PDF</button>
+                    <a asp-action="Profile" class="btn btn-outline-secondary rounded-pill">Yeniden Oluştur</a>
                 </div>
             }
             else
             {
                 <div class="text-center py-5">
-                    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status"></div>
-                    <h4 class="mt-4 text-dark font-weight-bold">Planınız Hazırlanıyor...</h4>
-                    <p class="text-muted">Lütfen bekleyin, Gemini AI programınızı oluşturuyor.</p>
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <h4 class="mt-4">Planınız Hazırlanıyor...</h4>
+                    <p>Lütfen bekleyin, Gemini AI programınızı oluşturuyor.</p>
                 </div>
             }
         </div>

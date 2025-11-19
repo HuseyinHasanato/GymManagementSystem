@@ -31,23 +31,32 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 .AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-// 3. إضافة خدمات الـ Sessions والكوكيز
+// 3. إضافة خدمات الـ Sessions والكوكيز مع حل مشكلة SameSite
 builder.Services.AddSession(options => {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // يضمن عملها عبر HTTPS
 });
 
 builder.Services.ConfigureApplicationCookie(options => {
     options.LoginPath = "/Identity/Account/Login";
     options.AccessDeniedPath = "/Identity/Account/AccessDenied";
     options.ExpireTimeSpan = TimeSpan.FromDays(30);
+
+    // --- تعديل لحل مشكلة المتصفح ---
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
 
-// 4. [تعديل أساسي] تسجيل خدمة Gemini AI
-// قمنا بربط الواجهة IAIService بالتنفيذ العملي AIService
+// إعداد Antiforgery لحل مشكلة الـ Cookies في نماذج الـ POST مثل SaveProfile
+builder.Services.AddAntiforgery(options => {
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+});
+
+// 4. تسجيل خدمة Gemini AI
 builder.Services.AddHttpClient<IAIService, AIService>(client => {
-    client.Timeout = TimeSpan.FromSeconds(60); // مهلة كافية لرد الذكاء الاصطناعي
+    client.Timeout = TimeSpan.FromSeconds(60);
 });
 
 // 5. تسجيل خدمة تهيئة قاعدة البيانات
@@ -92,7 +101,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// تفعيل الجلسات (ضروري جداً)
+// تفعيل الجلسات
 app.UseSession();
 
 app.MapControllerRoute(
@@ -102,9 +111,7 @@ app.MapRazorPages();
 
 app.Run();
 
-// *******************************************************************
 // منطق إنشاء المدير (Admin) تلقائياً
-// *******************************************************************
 async Task InitializeDatabase(IServiceProvider services)
 {
     var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
