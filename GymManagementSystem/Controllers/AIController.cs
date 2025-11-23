@@ -85,35 +85,35 @@ namespace GymManagementSystem.Controllers
         public async Task<IActionResult> GeneratePlan()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var profile = await _context.UserProfiles.AsNoTracking().FirstOrDefaultAsync(p => p.MemberId == userId);
+            // تأكد من جلب البيانات الأساسية
+            var profile = await _context.UserProfiles
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.MemberId == userId);
 
             if (profile == null) return RedirectToAction(nameof(Profile));
 
             try
             {
-                // --- تعديل تشخيصي ---
-                _logger.LogInformation("AI isteği başlatılıyor...");
-
-                // نقوم بطلب الخطة ونضعها مباشرة في ViewBag
+                // استدعاء الخدمة مع مهلة زمنية بسيطة محاكة
                 var workoutPlan = await _aiService.GenerateWorkoutPlanAsync(profile);
 
-                if (string.IsNullOrEmpty(workoutPlan))
+                if (string.IsNullOrWhiteSpace(workoutPlan))
                 {
-                    ViewBag.WorkoutPlan = "⚠️ AI Boş Yanıt Döndürdü. Lütfen API Key'i ve interneti kontrol edin.";
+                    ViewBag.WorkoutPlan = "⚠️ Plan oluşturulamadı. Lütfen bilgilerinizi kontrol edip tekrar deneyin.";
                 }
                 else
                 {
+                    // نستخدم هذا المتغير لعرض النص في الـ View
                     ViewBag.WorkoutPlan = workoutPlan;
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "AI Servis Hatası");
-                // هذا السطر سيظهر لك سبب المشكلة الحقيقي في المتصفح
-                ViewBag.WorkoutPlan = $"❌ Hata Detayı: {ex.Message}";
+                ViewBag.WorkoutPlan = $"❌ Bağlantı Hatası: API şu anda yanıt vermiyor. (Detay: {ex.Message})";
             }
 
-            return View(profile);
+            return View(profile); // نرسل البروفايل لعرض البيانات الشخصية بجانب الخطة
         }
     }
 }

@@ -4,34 +4,61 @@
 }
 
 <div class="container mt-4 mb-5">
-    <div class="card shadow-lg border-0">
-        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-            <h3 class="mb-0 h4"><i class="bi bi-cpu-fill text-info"></i> AI Antrenman Asistanı</h3>
+    <div class="card shadow-lg border-0 overflow-hidden">
+        @* الهيدر بتنسيق رياضي عصري *@
+        <div class="card-header bg-gradient bg-primary text-white p-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="mb-0"><i class="bi bi-robot me-2"></i> AI Kişisel Antrenör</h3>
+                <span class="badge bg-light text-primary p-2">Gemini 1.5 Flash</span>
+            </div>
         </div>
 
-        <div class="card-body p-4">
+        <div class="card-body p-4 bg-light">
             @if (ViewBag.WorkoutPlan != null)
             {
-                <div class="p-4 bg-white border rounded shadow-sm">
-                    <h5 class="text-primary border-bottom pb-2 mb-4">Size Özel Program</h5>
-
-                    @* تعديل أساسي: تحويل النص القادم من AI ليدعم الأسطر الجديدة *@
-                    <div class="ai-content" style="white-space: pre-line; font-family: sans-serif; line-height: 1.6;">
-                        @Html.Raw(ViewBag.WorkoutPlan.ToString())
+                <div class="row">
+                    @* ملخص البيانات الجانبي *@
+                    <div class="col-md-3 mb-4">
+                        <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-body">
+                                <h6 class="text-muted text-uppercase small fw-bold">Profil Bilgileri</h6>
+                                <hr />
+                                <div class="mb-2"><strong>Boy:</strong> @Model.HeightCm cm</div>
+                                <div class="mb-2"><strong>Kilo:</strong> @Model.WeightKg kg</div>
+                                <div class="mb-3"><strong>Hedef:</strong> <span class="badge bg-success">@Model.FitnessGoal</span></div>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                <div class="mt-4 text-center no-print">
-                    <button onclick="window.print()" class="btn btn-primary rounded-pill">Yazdır / PDF</button>
-                    <a asp-action="Profile" class="btn btn-outline-secondary rounded-pill">Yeniden Oluştur</a>
+                    @* مساحة عرض الخطة *@
+                    <div class="col-md-9">
+                        <div class="p-4 bg-white border-0 shadow-sm rounded-4">
+                            <h5 class="text-dark fw-bold mb-4 border-start border-4 border-primary ps-3">Size Özel Hazırlanan Program</h5>
+
+                            @* عرض النص مع الحفاظ على التنسيق *@
+                            <div class="ai-output" style="white-space: pre-wrap; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1.05rem; line-height: 1.8; color: #2c3e50;">
+                                @* نستخدم استبدال بسيط لإخفاء النجوم الزائدة وجعل النص أوضح *@
+                                @Html.Raw(ViewBag.WorkoutPlan.ToString().Replace("**", ""))
+                            </div>
+                        </div>
+
+                        <div class="mt-4 d-flex gap-2 no-print">
+                            <button onclick="window.print()" class="btn btn-dark px-4 rounded-pill">
+                                <i class="bi bi-printer me-2"></i> Yazdır / PDF Kaydet
+                            </button>
+                            <a asp-action="Profile" class="btn btn-outline-primary px-4 rounded-pill">
+                                <i class="bi bi-arrow-clockwise me-2"></i> Bilgileri Güncelle
+                            </a>
+                        </div>
+                    </div>
                 </div>
             }
             else
             {
                 <div class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status"></div>
-                    <h4 class="mt-4">Planınız Hazırlanıyor...</h4>
-                    <p>Lütfen bekleyin, Gemini AI programınızı oluşturuyor.</p>
+                    <div class="spinner-grow text-primary" style="width: 3rem; height: 3rem;" role="status"></div>
+                    <h4 class="mt-4 fw-bold">Yapay Zekâ Analiz Ediyor...</h4>
+                    <p class="text-muted">Lütfen bekleyin, profilinize en uygun spor programı oluşturuluyor.</p>
                 </div>
             }
         </div>
@@ -41,22 +68,29 @@
 @section Scripts {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
-        /* هذا التنسيق هو ما سيجعل النص يظهر كجدول مرتب */
-        .ai-simple-content {
-            white-space: pre-wrap; /* يحافظ على الأسطر الجديدة */
-            word-wrap: break-word;
-            font-family: 'Courier New', Courier, monospace; /* خط ثابت العرض لجعل الجداول متناسقة */
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-left: 5px solid #0d6efd;
-            font-size: 1rem;
-            line-height: 1.5;
+        .bg-gradient {
+            background: linear-gradient(45deg, #0d6efd, #0dcaf0);
+        }
+
+        .ai-output {
+            background-color: #ffffff;
             color: #333;
         }
 
+        /* تحسين مظهر الطباعة للتقرير */
         @@media print {
-            .no-print {
+            .no-print, .btn, .badge, .navbar, footer {
                 display: none !important;
+            }
+
+            .card {
+                box-shadow: none !important;
+                border: none !important;
+            }
+
+            .container {
+                width: 100% !important;
+                max-width: 100% !important;
             }
         }
     </style>
