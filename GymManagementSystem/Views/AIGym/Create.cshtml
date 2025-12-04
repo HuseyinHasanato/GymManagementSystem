@@ -1,0 +1,58 @@
+﻿@model GymManagementSystem.Models.AIGymProfile
+
+@{
+    ViewData["Title"] = "AI Fitness Planner";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">🏋️‍♂️ AI Fitness Planner</h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">أدخل بياناتك ليقوم الذكاء الاصطناعي بتصميم خطة مناسبة لك.</p>
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Weight" class="form-label"></label>
+                            <input asp-for="Weight" class="form-control" placeholder="70" />
+                            <span asp-validation-for="Weight" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Height" class="form-label"></label>
+                            <input asp-for="Height" class="form-control" placeholder="175" />
+                            <span asp-validation-for="Height" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Goal" class="form-label"></label>
+                            <select asp-for="Goal" class="form-select">
+                                <option value="">-- اختر هدفك --</option>
+                                <option value="Lose Weight (فقدان الوزن)">فقدان الوزن</option>
+                                <option value="Build Muscle (بناء العضلات)">بناء العضلات</option>
+                                <option value="Fitness & Health (لياقة وصحة)">لياقة عامة وصحة</option>
+                            </select>
+                            <span asp-validation-for="Goal" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                ✨ احصل على الخطة الذكية
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

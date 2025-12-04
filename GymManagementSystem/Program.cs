@@ -4,19 +4,38 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+// ≈⁄œ«œ «·« ’«· »ﬁ«⁄œ… «·»Ì«‰« 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+// --- ≈⁄œ«œ«  «·ÂÊÌ… ( Œ›Ì› ‘—Êÿ «·»«”Ê—œ) ---
+builder.Services.AddDefaultIdentity<IdentityUser>(options => {
+    options.SignIn.RequireConfirmedAccount = false; // ·« Ì ÿ·»  √ﬂÌœ ≈Ì„Ì·
+    options.Password.RequireDigit = false;          // ·« Ì ÿ·» √—ﬁ«„
+    options.Password.RequireLowercase = false;      // ·« Ì ÿ·» Õ—Ê› ’€Ì—…
+    options.Password.RequireNonAlphanumeric = false;// ·« Ì ÿ·» —„Ê“ (!@#)
+    options.Password.RequireUppercase = false;      // ·« Ì ÿ·» Õ—Ê› ﬂ»Ì—…
+    options.Password.RequiredLength = 3;            // «·ÿÊ· «·„”„ÊÕ 3 Õ—Ê› (·√Ã· sau)
+})
+.AddRoles<IdentityRole>() //  ›⁄Ì· ‰Ÿ«„ «·√œÊ«—
+.AddEntityFrameworkStores<ApplicationDbContext>();
+
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// --- ﬂÊœ  ‘€Ì· «·‹ Seeder ·≈‰‘«¡ «·√œ„‰ ---
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await DbSeeder.SeedRolesAndAdminAsync(services);
+}
+// ------------------------------------------
+
+// ≈⁄œ«œ«  «·‹ Pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
@@ -24,7 +43,6 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 

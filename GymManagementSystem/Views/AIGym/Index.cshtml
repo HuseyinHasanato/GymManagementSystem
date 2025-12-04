@@ -1,0 +1,37 @@
+﻿@model GymManagementSystem.Models.AIGymProfile
+
+@{
+    ViewData["Title"] = "Your AI Plan";
+}
+
+<div class="container mt-5">
+    <div class="card border-success shadow">
+        <div class="card-header bg-success text-white">
+            <h2>🤖 AI Recommendation Result</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 border-end">
+                    <h4>بياناتك الحالية:</h4>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><strong>الوزن:</strong> @Model.Weight kg</li>
+                        <li class="list-group-item"><strong>الطول:</strong> @Model.Height cm</li>
+                        <li class="list-group-item"><strong>الهدف:</strong> @Model.Goal</li>
+                    </ul>
+                    <div class="mt-4 text-center">
+                        <a asp-action="Reset" class="btn btn-outline-danger btn-sm">حذف وإعادة المحاولة</a>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <h4 class="text-success mb-3">💡 الخطة المقترحة لك:</h4>
+                    <div class="p-4 bg-light rounded border">
+                        <p class="lead" style="white-space: pre-wrap;">@Model.AIResult</p>
+                    </div>
+                    <div class="alert alert-info mt-3">
+                        <small>تم توليد هذه الخطة تلقائياً بواسطة نظام الذكاء الاصطناعي بناءً على مؤشرات جسمك.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using GymManagementSystem.Models; // تأكد من إضافة هذا السطر
+using GymManagementSystem.Models;
 
 namespace GymManagementSystem.Data
 {
@@ -11,10 +11,13 @@ namespace GymManagementSystem.Data
         {
         }
 
-        // --- أضف هذه الأسطر الثلاثة هنا ---
+        // الجداول السابقة
         public DbSet<GymService> GymServices { get; set; }
         public DbSet<Trainer> Trainers { get; set; }
         public DbSet<Appointment> Appointments { get; set; }
-        // ----------------------------------
+
+        // --- الجدول الجديد للذكاء الاصطناعي ---
+        public DbSet<AIGymProfile> AIGymProfiles { get; set; }
+        // -------------------------------------
     }
 }
