@@ -1,8 +1,52 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Ana Sayfa";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4 text-primary">Spor Salonu Yönetim Sistemine Hoşgeldiniz</h1>
+    <p class="lead">Sağlıklı bir yaşam için doğru adrestesiniz.</p>
+    <hr class="my-4">
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <h3 class="card-title">🏋️‍♂️ Hizmetlerimiz</h3>
+                <p class="card-text">Yoga, Pilates, Fitness ve daha fazlası. Size uygun hizmeti seçin.</p>
+                <a asp-controller="GymServices" asp-action="Index" class="btn btn-outline-primary">Hizmetleri İncele</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <h3 class="card-title">wd Eğitmenlerimiz</h3>
+                <p class="card-text">Alanında uzman antrenörlerimizle tanışın ve hedeflerinize ulaşın.</p>
+                <a asp-controller="Trainers" asp-action="Index" class="btn btn-outline-primary">Eğitmenleri Gör</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100 border-success">
+            <div class="card-body text-center">
+                <h3 class="card-title text-success">🤖 AI Koç</h3>
+                <p class="card-text">Yapay zeka desteği ile size özel antrenman ve beslenme planı oluşturun.</p>
+                <a asp-controller="AIGym" asp-action="Index" class="btn btn-success">Plan Oluştur</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4 justify-content-center">
+    <div class="col-md-6 text-center">
+        <div class="alert alert-info" role="alert">
+            <h4 class="alert-heading">Hemen Başlayın!</h4>
+            <p>Müsaitlik durumuna göre dilediğiniz eğitmen ve hizmet için hemen randevu alabilirsiniz.</p>
+            <hr>
+            <a asp-controller="Appointments" asp-action="Create" class="btn btn-primary btn-lg">📅 Şimdi Randevu Al</a>
+        </div>
+    </div>
 </div>

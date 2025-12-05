@@ -1,7 +1,7 @@
 ﻿@model GymManagementSystem.Models.AIGymProfile
 
 @{
-    ViewData["Title"] = "AI Fitness Planner";
+    ViewData["Title"] = "Yapay Zeka Planlayıcı";
 }
 
 <div class="container mt-5">
@@ -9,10 +9,10 @@
         <div class="col-md-6">
             <div class="card shadow-lg">
                 <div class="card-header bg-primary text-white">
-                    <h3 class="card-title mb-0">🏋️‍♂️ AI Fitness Planner</h3>
+                    <h3 class="card-title mb-0">🏋️‍♂️ AI Fitness Planlayıcı</h3>
                 </div>
                 <div class="card-body">
-                    <p class="text-muted">أدخل بياناتك ليقوم الذكاء الاصطناعي بتصميم خطة مناسبة لك.</p>
+                    <p class="text-muted">Size özel bir plan oluşturmak için bilgilerinizi girin.</p>
                     <form asp-action="Create">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
@@ -31,17 +31,17 @@
                         <div class="mb-3">
                             <label asp-for="Goal" class="form-label"></label>
                             <select asp-for="Goal" class="form-select">
-                                <option value="">-- اختر هدفك --</option>
-                                <option value="Lose Weight (فقدان الوزن)">فقدان الوزن</option>
-                                <option value="Build Muscle (بناء العضلات)">بناء العضلات</option>
-                                <option value="Fitness & Health (لياقة وصحة)">لياقة عامة وصحة</option>
+                                <option value="">-- Hedef Seçiniz --</option>
+                                <option value="Lose Weight">Kilo Vermek</option>
+                                <option value="Build Muscle">Kas Yapmak</option>
+                                <option value="Fitness & Health">Sağlık ve Fitlik</option>
                             </select>
                             <span asp-validation-for="Goal" class="text-danger"></span>
                         </div>
 
                         <div class="d-grid">
                             <button type="submit" class="btn btn-primary btn-lg">
-                                ✨ احصل على الخطة الذكية
+                                ✨ Planı Oluştur
                             </button>
                         </div>
                     </form>

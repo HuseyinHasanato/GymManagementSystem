@@ -1,51 +1,62 @@
 ﻿@model GymManagementSystem.Models.Appointment
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Randevu Sil";
 }
 
-<h1>Delete</h1>
+<h1>Randevu Sil</h1>
 
-<h3>Are you sure you want to delete this?</h3>
+<h3>Bu randevuyu silmek istediğinizden emin misiniz?</h3>
 <div>
-    <h4>Appointment</h4>
+    <h4>Randevu Bilgileri</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.AppointmentDate)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.AppointmentDate)
         </dd>
-        <dt class = "col-sm-2">
+
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.IsConfirmed)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.IsConfirmed)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Member)
+
+        <dt class="col-sm-2">
+            Üye (Kullanıcı)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Member.Id)
+        <dd class="col-sm-10">
+            @if (Model.Member != null)
+            {
+                @Model.Member.UserName
+            }
+            else
+            {
+                <span class="text-muted">Mevcut Değil</span>
+            }
         </dd>
-        <dt class = "col-sm-2">
+
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.GymService)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.GymService.Name)
+        <dd class="col-sm-10">
+            @Model.GymService?.Name
         </dd>
-        <dt class = "col-sm-2">
+
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Trainer)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Trainer.FullName)
+        <dd class="col-sm-10">
+            @Model.Trainer?.FullName
         </dd>
     </dl>
-    
+
     <form asp-action="Delete">
         <input type="hidden" asp-for="Id" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
+        <input type="submit" value="Sil" class="btn btn-danger" /> |
+        <a asp-action="Index">Listeye Geri Dön</a>
     </form>
 </div>

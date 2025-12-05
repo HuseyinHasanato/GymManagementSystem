@@ -6,12 +6,14 @@ namespace GymManagementSystem.Models
     {
         public int Id { get; set; }
 
-        [Required, Display(Name = "اسم المدرب")]
+        [Required(ErrorMessage = "Eğitmen adı zorunludur.")]
+        [Display(Name = "Ad Soyad")]
         public string FullName { get; set; }
 
-        [Display(Name = "التخصص")]
+        [Display(Name = "Uzmanlık Alanı")]
         public string Expertise { get; set; }
 
-        public string ImageUrl { get; set; } // صورة المدرب
+        [Display(Name = "Fotoğraf URL")]
+        public string ImageUrl { get; set; }
     }
 }

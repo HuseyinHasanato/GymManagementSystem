@@ -57,24 +57,23 @@ namespace GymManagementSystem.Controllers
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 model.MemberId = userId;
 
-                // --- محاكاة الذكاء الاصطناعي (AI Simulation) ---
-                // ملاحظة: في المشروع الحقيقي، هنا نستخدم HttpClient للاتصال بـ OpenAI API
 
                 string aiResponse = "";
                 double bmi = model.Weight / ((model.Height / 100) * (model.Height / 100));
 
-                if (model.Goal.Contains("عضلات") || model.Goal.Contains("Muscle"))
+                if (model.Goal.Contains("Muscle"))
                 {
-                    aiResponse = $"بناءً على وزنك ({model.Weight}kg) وطولك، خطة الذكاء الاصطناعي تقترح: التركيز على تمارين المقاومة (Hypertrophy) 4 أيام أسبوعياً، مع زيادة البروتين إلى 2 جرام لكل كيلو من وزن الجسم. مؤشر كتلة جسمك هو {bmi:F1}.";
+                    aiResponse = $"Kilonuza ({model.Weight}kg) ve boyunuza göre yapay zeka planı: Haftada 4 gün hipertrofi (kas büyütme) antrenmanına odaklanın. Günlük protein alımınızı vücut ağırlığınızın 2 katına (gram cinsinden) çıkarın. Vücut Kitle İndeksiniz (BMI): {bmi:F1}.";
                 }
-                else if (model.Goal.Contains("وزن") || model.Goal.Contains("Weight"))
+                else if (model.Goal.Contains("Lose Weight"))
                 {
-                    aiResponse = $"لتحقيق هدفك في إنقاص الوزن، يقترح النظام: عجز في السعرات الحرارية بمقدار 500 سعرة يومياً، مع المشي لمدة 30 دقيقة بعد التمارين. مؤشر كتلة جسمك الحالي هو {bmi:F1}، وهو يحتاج لبعض التحسين.";
+                    aiResponse = $"Kilo verme hedefiniz için sistem önerisi: Günlük 500 kalori açığı oluşturun ve antrenman sonrası 30 dakika kardiyo yapın. Şeker ve işlenmiş gıdalardan kaçının. Mevcut Vücut Kitle İndeksiniz: {bmi:F1}.";
                 }
                 else
                 {
-                    aiResponse = $"نصيحة عامة للياقة: حافظ على نشاطك لمدة 150 دقيقة أسبوعياً. مؤشر كتلة جسمك هو {bmi:F1}، وهو في النطاق الصحي.";
+                    aiResponse = $"Genel sağlık ve fitlik için öneri: Haftada en az 150 dakika orta tempolu aktivite yapın. Uykunuza dikkat edin ve bol su için. Vücut Kitle İndeksiniz {bmi:F1} olup sağlıklı aralıktadır.";
                 }
+                
 
                 model.AIPrompt = $"User Stats: Weight {model.Weight}, Height {model.Height}, Goal: {model.Goal}";
                 model.AIResult = aiResponse;
@@ -87,7 +86,6 @@ namespace GymManagementSystem.Controllers
             return View(model);
         }
 
-        // زر لحذف الملف وإعادة المحاولة
         public async Task<IActionResult> Reset()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

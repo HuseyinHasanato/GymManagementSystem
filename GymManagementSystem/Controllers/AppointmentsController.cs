@@ -7,9 +7,12 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using GymManagementSystem.Data;
 using GymManagementSystem.Models;
+using System.Security.Claims; // لإحضار هوية المستخدم
+using Microsoft.AspNetCore.Authorization; // لحماية الكنترولر
 
 namespace GymManagementSystem.Controllers
 {
+    [Authorize] // تأكد أن المستخدم مسجل للدخول
     public class AppointmentsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -19,11 +22,24 @@ namespace GymManagementSystem.Controllers
             _context = context;
         }
 
-        // GET: Appointments
+        // GET: Appointments (عرض المواعيد للعضو فقط، وللأدمن كل المواعيد)
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Appointments.Include(a => a.GymService).Include(a => a.Member).Include(a => a.Trainer);
-            return View(await applicationDbContext.ToListAsync());
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var appointments = _context.Appointments
+                .Include(a => a.GymService)
+                .Include(a => a.Member)
+                .Include(a => a.Trainer)
+                .AsQueryable();
+
+            // تحقق من الدور: إذا لم يكن أدمن، يفلتر حسب هويته فقط
+            if (!User.IsInRole("Admin"))
+            {
+                appointments = appointments.Where(a => a.MemberId == userId);
+            }
+
+            return View(await appointments.ToListAsync());
         }
 
         // GET: Appointments/Details/5
@@ -51,26 +67,41 @@ namespace GymManagementSystem.Controllers
         public IActionResult Create()
         {
             ViewData["GymServiceId"] = new SelectList(_context.GymServices, "Id", "Name");
-            ViewData["MemberId"] = new SelectList(_context.Users, "Id", "Id");
             ViewData["TrainerId"] = new SelectList(_context.Trainers, "Id", "FullName");
+            // حذف ViewData["MemberId"] لأنه يتم تعيينه تلقائيًا من السيرفر
             return View();
         }
 
-        // POST: Appointments/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: Appointments/Create (إضافة المنطق الذكي هنا)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,AppointmentDate,IsConfirmed,MemberId,GymServiceId,TrainerId")] Appointment appointment)
+        // حذف [Bind] لضمان عدم تجاهل الخصائص التي يتم تعيينها يدوياً (مثل MemberId)
+        public async Task<IActionResult> Create(Appointment appointment)
         {
+            // 1. تعيين هوية العضو تلقائياً (الحل لمشكلة NULL MemberId)
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            appointment.MemberId = userId;
+
+            // 2. التحقق من التعارض (Conflict Check)
+            bool isBusy = await _context.Appointments.AnyAsync(a =>
+                a.TrainerId == appointment.TrainerId &&
+                a.AppointmentDate == appointment.AppointmentDate);
+
+            if (isBusy)
+            {
+                // رسالة الخطأ باللغة التركية
+                ModelState.AddModelError("", "Bu saatte eğitmen meşgul, lütfen başka bir saat seçin.");
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(appointment);
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(); // هنا كان يحدث الخطأ
                 return RedirectToAction(nameof(Index));
             }
+
+            // إعادة تعبئة القوائم في حال وجود خطأ
             ViewData["GymServiceId"] = new SelectList(_context.GymServices, "Id", "Name", appointment.GymServiceId);
-            ViewData["MemberId"] = new SelectList(_context.Users, "Id", "Id", appointment.MemberId);
             ViewData["TrainerId"] = new SelectList(_context.Trainers, "Id", "FullName", appointment.TrainerId);
             return View(appointment);
         }
@@ -95,16 +126,23 @@ namespace GymManagementSystem.Controllers
         }
 
         // POST: Appointments/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        // يجب أن نستخدم [Bind] هنا لضمان عدم تغيير MemberId بشكل غير مقصود من الفورم
         public async Task<IActionResult> Edit(int id, [Bind("Id,AppointmentDate,IsConfirmed,MemberId,GymServiceId,TrainerId")] Appointment appointment)
         {
             if (id != appointment.Id)
             {
                 return NotFound();
             }
+
+            // يجب تعيين MemberId لضمان عدم إزالته من النموذج عند التعديل
+            var originalAppointment = await _context.Appointments.AsNoTracking().FirstOrDefaultAsync(a => a.Id == id);
+            if (originalAppointment == null) return NotFound();
+
+            // التأكد من الحفاظ على MemberId الأصلي
+            appointment.MemberId = originalAppointment.MemberId;
+
 
             if (ModelState.IsValid)
             {

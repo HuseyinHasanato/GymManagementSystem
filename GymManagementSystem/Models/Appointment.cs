@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
 
 namespace GymManagementSystem.Models
@@ -7,21 +8,34 @@ namespace GymManagementSystem.Models
     {
         public int Id { get; set; }
 
-        [Display(Name = "تاريخ الحجز")]
+        [Required]
+        [Display(Name = "Randevu Tarihi")] // كانت: تاريخ الحجز
         public DateTime AppointmentDate { get; set; }
 
-        public bool IsConfirmed { get; set; } = false; // حالة الموافقة
+        [Display(Name = "Onay Durumu")] // كانت: IsConfirmed
+        public bool IsConfirmed { get; set; } = false;
 
-        // ربط الحجز بالعضو (المستخدم)
-        public string MemberId { get; set; }
+        // --- العلاقات ---
+
+        [Display(Name = "Üye")] // كانت: Member
+        public string? MemberId { get; set; }
+
+        [ForeignKey("MemberId")]
+        [Display(Name = "Üye")]
         public IdentityUser? Member { get; set; }
 
-        // ربط الحجز بالخدمة
+        [Display(Name = "Hizmet")] // كانت: GymService
         public int GymServiceId { get; set; }
+
+        [ForeignKey("GymServiceId")]
+        [Display(Name = "Hizmet")]
         public GymService? GymService { get; set; }
 
-        // ربط الحجز بالمدرب
+        [Display(Name = "Eğitmen")] // كانت: Trainer
         public int TrainerId { get; set; }
+
+        [ForeignKey("TrainerId")]
+        [Display(Name = "Eğitmen")]
         public Trainer? Trainer { get; set; }
     }
 }

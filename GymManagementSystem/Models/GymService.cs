@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema; // <--- هذا السطر مطلوب
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GymManagementSystem.Models
 {
@@ -7,17 +7,17 @@ namespace GymManagementSystem.Models
     {
         public int Id { get; set; }
 
-        [Required, Display(Name = "اسم الخدمة")]
+        [Required(ErrorMessage = "Hizmet adı zorunludur.")]
+        [Display(Name = "Hizmet Adı")]
         public string Name { get; set; }
 
-        [Display(Name = "الوصف")]
+        [Display(Name = "Açıklama")]
         public string Description { get; set; }
 
-        [Display(Name = "المدة (دقيقة)")]
+        [Display(Name = "Süre (Dakika)")]
         public int Duration { get; set; }
 
-        [Display(Name = "السعر")]
-        // <--- هذا السطر الجديد يحل مشكلة التحذير
+        [Display(Name = "Ücret (TL)")]
         [Column(TypeName = "decimal(18,2)")]
         public decimal Price { get; set; }
     }

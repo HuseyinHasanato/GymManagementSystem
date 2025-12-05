@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.AspNetCore.Identity; // ضروري للتعرف على IdentityUser
+using Microsoft.AspNetCore.Identity;
 
 namespace GymManagementSystem.Models
 {
@@ -8,30 +8,28 @@ namespace GymManagementSystem.Models
     {
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "الوزن مطلوب.")]
-        [Display(Name = "الوزن (كجم)")]
-        [Range(30, 300, ErrorMessage = "يجب أن يكون الوزن بين 30 و 300 كجم.")]
+        [Required(ErrorMessage = "Kilo bilgisi zorunludur.")]
+        [Display(Name = "Kilo (kg)")]
+        [Range(30, 300, ErrorMessage = "Kilo 30 ile 300 arasında olmalıdır.")]
         public double Weight { get; set; }
 
-        [Required(ErrorMessage = "الطول مطلوب.")]
-        [Display(Name = "الطول (سم)")]
-        [Range(100, 250, ErrorMessage = "يجب أن يكون الطول بين 100 و 250 سم.")]
+        [Required(ErrorMessage = "Boy bilgisi zorunludur.")]
+        [Display(Name = "Boy (cm)")]
+        [Range(100, 250, ErrorMessage = "Boy 100 ile 250 cm arasında olmalıdır.")]
         public double Height { get; set; }
 
-        [Required(ErrorMessage = "الهدف مطلوب.")]
-        [Display(Name = "هدفك الرياضي")]
+        [Required(ErrorMessage = "Hedef seçimi zorunludur.")]
+        [Display(Name = "Hedefiniz")]
         public string Goal { get; set; }
 
-        [Display(Name = "خطة الذكاء الاصطناعي المقترحة")]
+        [Display(Name = "AI İstemi")]
         public string? AIPrompt { get; set; }
 
-        [Display(Name = "النتيجة المقترحة")]
+        [Display(Name = "AI Tavsiyesi")]
         public string? AIResult { get; set; }
 
-        // الربط بالمستخدم
         public string MemberId { get; set; }
-
         [ForeignKey("MemberId")]
-        public IdentityUser? Member { get; set; } // تم التصحيح هنا: IdentityUser بدلاً من ApplicationUser
+        public IdentityUser? Member { get; set; }
     }
 }

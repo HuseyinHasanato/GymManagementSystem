@@ -20,25 +20,26 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Ana Sayfa</a>
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="GymServices" asp-action="Index">Manage Services</a>
+                            <a class="nav-link text-dark" asp-controller="GymServices" asp-action="Index">Hizmet Yönetimi</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Trainers" asp-action="Index">Manage Trainers</a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Appointments" asp-action="Index">My Appointments</a>
+                            <a class="nav-link text-dark" asp-controller="Trainers" asp-action="Index">Eğitmen Yönetimi</a>
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link text-primary fw-bold" asp-controller="AIGym" asp-action="Index">🤖 AI Coach</a>
+                            <a class="nav-link text-dark" asp-controller="Appointments" asp-action="Index">Randevularım</a>
                         </li>
+
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-primary fw-bold" asp-controller="AIGym" asp-action="Index">🤖 AI Koç</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Gizlilik</a>
                         </li>
                     </ul>
                     <partial name="_LoginPartial" />
@@ -54,7 +55,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 1447 - GymManagementSystem - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2025 - GymManagementSystem - <a asp-area="" asp-controller="Home" asp-action="Privacy">Gizlilik</a>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
