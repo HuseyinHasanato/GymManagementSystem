@@ -201,11 +201,9 @@ namespace GymManagementSystem.Controllers
             {
                 _context.Appointments.Remove(appointment);
             }
-
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-
         private bool AppointmentExists(int id)
         {
             return _context.Appointments.Any(e => e.Id == id);

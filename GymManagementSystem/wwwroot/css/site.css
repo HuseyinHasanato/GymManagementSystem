@@ -1,22 +1,59 @@
+/* --- 1. GLOBAL FONT (GOOGLE FONTS) --- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+/* --- 2. THEME COLORS & VARIABLES --- */
+:root {
+    /* «··Ê‰ «·√”«”Ì (Primary Color) ·‹ Bootstrap - ‰Œ «— Teal/Cyan ⁄’—Ì */
+    --bs-primary: #00bcd4;
+    --bs-primary-rgb: 0, 188, 212;
+    /* Œ·›Ì… Œ›Ì›… */
+    --app-bg-color: #f8f9fa;
+    --app-main-font: 'Poppins', sans-serif;
+}
+
+/* --- 3. ORIGINAL LAYOUT AND TYPOGRAPHY --- */
 html {
-  font-size: 14px;
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
+/* --- 4. APPLY FONT TO BODY --- */
+body {
+    font-family: var(--app-main-font); /*  ÿ»Ìﬁ Œÿ Poppins */
+    background-color: var(--app-bg-color);
+    margin-bottom: 60px; /* «·ﬁ«⁄œ… «·√’·Ì… */
+}
+
+/* Keep original focus shadow rules, but update color reference */
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    /* «” Œœ«„ «··Ê‰ «·√”«”Ì «·ÃœÌœ ··Ÿ· */
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem var(--bs-primary);
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
-body {
-  margin-bottom: 60px;
+/* --- 5. CUSTOM STYLES & BUTTON OVERRIDES --- */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--app-main-font);
+    font-weight: 700; /* Ã⁄· «·⁄‰«ÊÌ‰ √ﬂÀ— Ê÷ÊÕ« */
 }
+
+.btn-primary {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+}
+
+    .btn-primary:hover {
+        background-color: #00a0b0; /*  √ÀÌ— √€„ﬁ ⁄‰œ «· „—Ì— */
+        border-color: #00a0b0;
+    }
