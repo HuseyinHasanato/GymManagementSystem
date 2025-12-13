@@ -1,0 +1,38 @@
+﻿@model GymManagementSystem.Models.Trainer
+
+@{
+    ViewData["Title"] = "Eğitmen Sil";
+}
+
+<h1>Eğitmen Sil</h1>
+
+<h3>Bu eğitmeni silmek istediğinizden emin misiniz?</h3>
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.FullName)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.FullName)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Specialty)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Specialty)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.ImageUrl)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.ImageUrl)
+        </dd>
+    </dl>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="Sil (Onayla)" class="btn btn-danger" />
+        <a asp-action="Index" class="btn btn-secondary">Listeye Geri Dön</a>
+    </form>
+</div>

@@ -1,0 +1,89 @@
+﻿@model IEnumerable<GymManagementSystem.Models.GroupClass>
+
+@{
+    ViewData["Title"] = "Grup Dersleri Listesi";
+}
+
+<h1>Grup Dersleri</h1>
+
+{{-- زر إضافة حصة (يظهر للمدير فقط) --}}
+@if (User.IsInRole("Admin"))
+{
+    <p>
+        <a asp-action="Create" class="btn btn-primary">Yeni Ders Ekle</a>
+    </p>
+}
+
+{{-- رسائل التنبيه (من EnrollmentsController - نجاح الحجز أو فشله) --}}
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success" role="alert">
+        @TempData["SuccessMessage"]
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger" role="alert">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.StartTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MaxCapacity)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Trainer)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.StartTime)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.MaxCapacity)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Trainer!.FullName) @* عرض اسم المدرب *@
+                </td>
+                <td>
+                    {{-- 1. زر التفاصيل (للكل) --}}
+                    <a asp-action="Details" asp-route-id="@item.GroupClassId" class="btn btn-sm btn-info">Detaylar</a>
+
+                    {{-- 2. أزرار الإدارة (للمدير فقط) --}}
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.GroupClassId" class="btn btn-sm btn-warning">Düzenle</a>
+                        <a asp-action="Delete" asp-route-id="@item.GroupClassId" class="btn btn-sm btn-danger">Sil</a>
+                    }
+
+                    {{-- 3. زر الحجز (يظهر إذا كان مسجل دخول وليس مديراً) --}}
+                    @if (User.Identity!.IsAuthenticated && !User.IsInRole("Admin"))
+                    {
+                        <form asp-action="Enroll" asp-controller="Enrollments" asp-route-classId="@item.GroupClassId" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-success">
+                                Kayıt Ol
+                            </button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

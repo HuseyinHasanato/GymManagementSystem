@@ -1,0 +1,50 @@
+﻿@model GymManagementSystem.Models.GroupClass
+
+@{
+    ViewData["Title"] = "Ders Detayları";
+}
+
+<h1>Ders Detayları</h1>
+
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Description)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.StartTime)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.StartTime)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.MaxCapacity)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.MaxCapacity)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Trainer)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Trainer!.FullName)
+        </dd>
+    </dl>
+</div>
+<div>
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-action="Edit" asp-route-id="@Model?.GroupClassId" class="btn btn-warning">Düzenle</a>
+    }
+    <a asp-action="Index" class="btn btn-secondary">Listeye Geri Dön</a>
+</div>
