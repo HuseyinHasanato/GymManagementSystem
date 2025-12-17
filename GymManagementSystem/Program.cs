@@ -6,7 +6,6 @@ using GymManagementSystem.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. إعداد قاعدة البيانات
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
@@ -15,7 +14,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-// 2. إعداد الهوية (Identity) وفقاً لمتطلبات المشروع (Admin: sau)
 builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
@@ -28,7 +26,6 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 .AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-// 3. إعدادات الجلسات والكوكيز
 builder.Services.AddSession(options => {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.IsEssential = true;
@@ -40,7 +37,6 @@ builder.Services.ConfigureApplicationCookie(options => {
     options.Cookie.SameSite = SameSiteMode.Lax;
 });
 
-// 4. تسجيل الخدمات
 builder.Services.AddHttpClient<IAIService, AIService>();
 builder.Services.AddScoped<DbInitializer>();
 builder.Services.AddControllersWithViews();
@@ -48,7 +44,6 @@ builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
-// 5. تهيئة قاعدة البيانات والمدير (Admin) تلقائياً
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -60,7 +55,6 @@ using (var scope = app.Services.CreateScope())
 
         await initializer.Initialize();
 
-        // إعداد الأدوار المطلوبة 
         string[] roles = { "Admin", "Member" };
         foreach (var role in roles)
         {
@@ -68,7 +62,6 @@ using (var scope = app.Services.CreateScope())
                 await roleManager.CreateAsync(new IdentityRole(role));
         }
 
-        // إنشاء حساب المدير المطلوب 
         var adminEmail = "huseyin.hasanato@ogr.sakarya.edu.tr";
         var adminUser = await userManager.FindByEmailAsync(adminEmail);
         if (adminUser == null)
@@ -85,7 +78,6 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// 6. Middleware
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
